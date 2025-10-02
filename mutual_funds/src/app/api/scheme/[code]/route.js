@@ -5,7 +5,7 @@ const CACHE_DURATION = 12 * 60 * 60 * 1000; // 12 hours
 
 export async function GET(request, { params }) {
   try {
-    const { code } = params;
+    const { code } = await params;
     const cacheKey = code;
     
     // Check cache
