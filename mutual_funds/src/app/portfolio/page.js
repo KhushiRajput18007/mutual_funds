@@ -5,13 +5,11 @@ import {
   Typography, Box, Card, CardContent, Grid, TextField, Button,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, Autocomplete, IconButton, Dialog, DialogTitle, DialogContent,
-  DialogActions, Fab, Container, Stack, Alert
+  DialogActions, Fab
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 export default function PortfolioPage() {
   const [schemes, setSchemes] = useState([]);
@@ -32,7 +30,9 @@ export default function PortfolioPage() {
     try {
       const response = await fetch('/api/mf');
       const data = await response.json();
-      setSchemes(data.slice(0, 100));
+      if (Array.isArray(data) && data.length > 0) {
+        setSchemes(data.slice(0, 100));
+      }
     } catch (error) {
       console.error('Error fetching schemes:', error);
     }
@@ -51,25 +51,32 @@ export default function PortfolioPage() {
   };
 
   const addHolding = async () => {
-    const units = parseFloat(newHolding.units);
-    const avgPrice = parseFloat(newHolding.avgPrice);
-    
-    if (!newHolding.scheme || !units || units <= 0 || !avgPrice || avgPrice <= 0) return;
+    if (!newHolding.scheme || newHolding.units <= 0 || newHolding.avgPrice <= 0) {
+      alert('Please fill all fields with valid values');
+      return;
+    }
 
     try {
-      // Get current NAV
       const response = await fetch(`/api/scheme/${newHolding.scheme.schemeCode}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch scheme data');
+      }
+      
       const data = await response.json();
+      if (!data.data || !data.data[0] || !data.data[0].nav) {
+        throw new Error('Invalid NAV data received');
+      }
+      
       const currentNAV = parseFloat(data.data[0].nav);
 
       const holding = {
         id: Date.now(),
         scheme: newHolding.scheme,
-        units: units,
-        avgPrice: avgPrice,
+        units: parseFloat(newHolding.units),
+        avgPrice: parseFloat(newHolding.avgPrice),
         currentNAV: currentNAV,
-        invested: units * avgPrice,
-        currentValue: units * currentNAV
+        invested: parseFloat(newHolding.units) * parseFloat(newHolding.avgPrice),
+        currentValue: parseFloat(newHolding.units) * currentNAV
       };
 
       const newPortfolio = [...portfolio, holding];
@@ -79,6 +86,7 @@ export default function PortfolioPage() {
       setNewHolding({ scheme: null, units: '', avgPrice: '' });
     } catch (error) {
       console.error('Error adding holding:', error);
+      alert('Failed to add holding. Please try again.');
     }
   };
 
@@ -101,40 +109,15 @@ export default function PortfolioPage() {
   const colors = pieData.map(item => item.color);
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Stack spacing={4}>
-        <Box textAlign="center">
-          <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 700, color: 'primary.main' }}>
-            <AccountBalanceWalletIcon sx={{ fontSize: 40, mr: 2, verticalAlign: 'middle' }} />
-            My Portfolio
-          </Typography>
-          <Typography variant="h6" color="text.secondary">
-            Track your mutual fund investments and performance
-          </Typography>
-        </Box>
+    <Box>
+      <Typography variant="h4" component="h1" gutterBottom>
+        My Portfolio
+      </Typography>
 
-        {portfolio.length === 0 && (
-          <Alert 
-            severity="info" 
-            action={
-              <Button 
-                variant="contained" 
-                startIcon={<AddIcon />}
-                onClick={() => setOpen(true)}
-                sx={{ ml: 2 }}
-              >
-                Add Your First Holding
-              </Button>
-            }
-          >
-            Start building your portfolio by adding your mutual fund holdings
-          </Alert>
-        )}
-
-        <Grid container spacing={3}>
+      <Grid container spacing={3} style={{ marginBottom: '32px' }}>
         <Grid item xs={12} md={3}>
           <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent style={{ textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">Total Invested</Typography>
               <Typography variant="h5">₹{totalInvested.toLocaleString()}</Typography>
             </CardContent>
@@ -142,7 +125,7 @@ export default function PortfolioPage() {
         </Grid>
         <Grid item xs={12} md={3}>
           <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent style={{ textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">Current Value</Typography>
               <Typography variant="h5">₹{totalCurrentValue.toLocaleString()}</Typography>
             </CardContent>
@@ -150,7 +133,7 @@ export default function PortfolioPage() {
         </Grid>
         <Grid item xs={12} md={3}>
           <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent style={{ textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">Total Gain/Loss</Typography>
               <Typography variant="h5" color={totalGainLoss >= 0 ? 'success.main' : 'error.main'}>
                 ₹{totalGainLoss.toLocaleString()}
@@ -160,7 +143,7 @@ export default function PortfolioPage() {
         </Grid>
         <Grid item xs={12} md={3}>
           <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent style={{ textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">Total Return %</Typography>
               <Typography variant="h5" color={totalGainLossPercent >= 0 ? 'success.main' : 'error.main'}>
                 {totalGainLossPercent.toFixed(2)}%
@@ -171,13 +154,12 @@ export default function PortfolioPage() {
       </Grid>
 
       <Grid container spacing={3}>
-        {/* Portfolio Allocation Chart */}
         {portfolio.length > 0 && (
           <Grid item xs={12} md={6}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>Portfolio Allocation</Typography>
-                <Box sx={{ height: 300 }}>
+                <Box style={{ height: 300 }}>
                   <ResponsiveContainer>
                     <PieChart>
                       <Pie
@@ -201,7 +183,6 @@ export default function PortfolioPage() {
           </Grid>
         )}
 
-        {/* Holdings Table */}
         <Grid item xs={12} md={portfolio.length > 0 ? 6 : 12}>
           <Card>
             <CardContent>
@@ -234,7 +215,7 @@ export default function PortfolioPage() {
                             <TableCell align="right">₹{holding.currentNAV}</TableCell>
                             <TableCell align="right">₹{holding.invested.toLocaleString()}</TableCell>
                             <TableCell align="right">₹{holding.currentValue.toLocaleString()}</TableCell>
-                            <TableCell align="right" sx={{ color: gainLoss >= 0 ? 'success.main' : 'error.main' }}>
+                            <TableCell align="right" style={{ color: gainLoss >= 0 ? 'green' : 'red' }}>
                               ₹{gainLoss.toLocaleString()} ({gainLossPercent.toFixed(2)}%)
                             </TableCell>
                             <TableCell align="right">
@@ -249,69 +230,28 @@ export default function PortfolioPage() {
                   </Table>
                 </TableContainer>
               ) : (
-                <Box sx={{ textAlign: 'center', py: 6 }}>
-                  <AccountBalanceWalletIcon sx={{ fontSize: 80, color: 'grey.300', mb: 2 }} />
-                  <Typography variant="h6" color="text.secondary" gutterBottom>
-                    No holdings added yet
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Start tracking your mutual fund investments
-                  </Typography>
-                  <Button 
-                    variant="contained" 
-                    size="large"
-                    startIcon={<AddIcon />}
-                    onClick={() => setOpen(true)}
-                    sx={{ borderRadius: 2 }}
-                  >
-                    Add Your First Holding
-                  </Button>
-                </Box>
+                <Typography variant="body2" color="text.secondary" style={{ textAlign: 'center', padding: '32px' }}>
+                  No holdings added yet. Click the + button to add your first holding.
+                </Typography>
               )}
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
-        {portfolio.length > 0 && (
-          <Box textAlign="center">
-            <Button 
-              variant="contained" 
-              size="large"
-              startIcon={<AddIcon />}
-              onClick={() => setOpen(true)}
-              sx={{ 
-                borderRadius: 3,
-                px: 4,
-                py: 1.5,
-                fontSize: '1.1rem',
-                background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)'
-              }}
-            >
-              Add New Holding
-            </Button>
-          </Box>
-        )}
+      <Fab
+        color="primary"
+        aria-label="add"
+        style={{ position: 'fixed', bottom: 16, right: 16 }}
+        onClick={() => setOpen(true)}
+      >
+        <AddIcon />
+      </Fab>
 
-        <Fab
-          color="primary"
-          aria-label="add"
-          sx={{ 
-            position: 'fixed', 
-            bottom: 16, 
-            right: 16,
-            display: { xs: 'flex', md: 'none' }
-          }}
-          onClick={() => setOpen(true)}
-        >
-          <AddIcon />
-        </Fab>
-
-      {/* Add Holding Dialog */}
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog open={open} onClose={() => { setOpen(false); setNewHolding({ scheme: null, units: '', avgPrice: '' }); }} maxWidth="sm" fullWidth>
         <DialogTitle>Add New Holding</DialogTitle>
         <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Grid container spacing={2} style={{ marginTop: '8px' }}>
             <Grid item xs={12}>
               <Autocomplete
                 options={schemes}
@@ -330,6 +270,7 @@ export default function PortfolioPage() {
                 type="number"
                 value={newHolding.units}
                 onChange={(e) => setNewHolding({...newHolding, units: e.target.value})}
+                inputProps={{ min: 0, step: 0.001 }}
               />
             </Grid>
             <Grid item xs={6}>
@@ -339,16 +280,16 @@ export default function PortfolioPage() {
                 type="number"
                 value={newHolding.avgPrice}
                 onChange={(e) => setNewHolding({...newHolding, avgPrice: e.target.value})}
+                inputProps={{ min: 0, step: 0.01 }}
               />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
+          <Button onClick={() => { setOpen(false); setNewHolding({ scheme: null, units: '', avgPrice: '' }); }}>Cancel</Button>
           <Button onClick={addHolding} variant="contained">Add Holding</Button>
         </DialogActions>
       </Dialog>
-      </Stack>
-    </Container>
+    </Box>
   );
 }

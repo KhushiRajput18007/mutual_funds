@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react';
 import {
   Typography, Box, Card, CardContent, Grid, Chip, CircularProgress,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, TextField, Button, FormControl, InputLabel, Select, MenuItem,
+  TextField, Button, FormControl, InputLabel, Select, MenuItem,
   Alert
 } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -13,7 +13,7 @@ import LumpsumCalculator from '../../../components/LumpsumCalculator';
 import SWPCalculator from '../../../components/SWPCalculator';
 
 export default function SchemeDetailPage({ params }) {
-  const resolvedParams = use(params);
+  const { code } = use(params);
   const [schemeData, setSchemeData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [returns, setReturns] = useState({});
@@ -29,31 +29,22 @@ export default function SchemeDetailPage({ params }) {
   useEffect(() => {
     fetchSchemeData();
     fetchReturns();
-  }, [resolvedParams.code]);
+  }, [code]);
 
   const fetchSchemeData = async () => {
     try {
-      const response = await fetch(`/api/scheme/${resolvedParams.code}`);
+      const response = await fetch(`/api/scheme/${code}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
       setSchemeData(data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching scheme data:', error);
-      // Fallback sample data
-      const sampleData = {
-        meta: {
-          scheme_name: 'Sample Mutual Fund Scheme',
-          fund_house: 'Sample AMC',
-          scheme_type: 'Open Ended',
-          scheme_category: 'Equity',
-          scheme_code: resolvedParams.code
-        },
-        data: Array.from({ length: 365 }, (_, i) => ({
-          date: format(new Date(Date.now() - i * 24 * 60 * 60 * 1000), 'dd-MM-yyyy'),
-          nav: (100 + Math.sin(i / 30) * 10 + Math.random() * 5).toFixed(4)
-        }))
-      };
-      setSchemeData(sampleData);
       setLoading(false);
     }
   };
@@ -64,19 +55,15 @@ export default function SchemeDetailPage({ params }) {
     
     for (const period of periods) {
       try {
-        const response = await fetch(`/api/scheme/${resolvedParams.code}/returns?period=${period}`);
-        const data = await response.json();
-        returnsData[period] = data;
+        const response = await fetch(`/api/scheme/${code}/returns?period=${period}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (!data.error) {
+            returnsData[period] = data;
+          }
+        }
       } catch (error) {
         console.error(`Error fetching ${period} returns:`, error);
-        // Fallback sample data
-        const sampleReturns = {
-          '1m': 2.5 + Math.random() * 3,
-          '3m': 6.8 + Math.random() * 4,
-          '6m': 12.3 + Math.random() * 5,
-          '1y': 18.7 + Math.random() * 6
-        };
-        returnsData[period] = { returns: sampleReturns[period] };
       }
     }
     
@@ -86,17 +73,31 @@ export default function SchemeDetailPage({ params }) {
   const calculateSIP = async () => {
     setSipLoading(true);
     try {
-      const response = await fetch(`/api/scheme/${resolvedParams.code}/sip`, {
+      console.log('SIP Form Data:', sipForm);
+      console.log('Scheme Code:', code);
+      
+      const response = await fetch(`/api/scheme/${code}/sip`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(sipForm),
       });
+      
+      console.log('SIP Response Status:', response.status);
       const data = await response.json();
-      setSipResult(data);
+      console.log('SIP Response Data:', data);
+      
+      if (data.error) {
+        console.error('SIP API Error:', data.error);
+        alert('Error: ' + data.error);
+      } else {
+        console.log('SIP Result:', data);
+        setSipResult(data);
+      }
     } catch (error) {
       console.error('Error calculating SIP:', error);
+      alert('Failed to calculate SIP: ' + error.message);
     }
     setSipLoading(false);
   };
@@ -106,27 +107,12 @@ export default function SchemeDetailPage({ params }) {
     
     return schemeData.data
       .slice(-365)
-      .map((item, index) => {
-        let formattedDate;
-        try {
-          const date = new Date(item.date);
-          if (isNaN(date.getTime())) {
-            // Fallback for invalid dates
-            const fallbackDate = new Date(Date.now() - index * 24 * 60 * 60 * 1000);
-            formattedDate = format(fallbackDate, 'MMM dd');
-          } else {
-            formattedDate = format(date, 'MMM dd');
-          }
-        } catch (error) {
-          // Fallback for any date parsing errors
-          const fallbackDate = new Date(Date.now() - index * 24 * 60 * 60 * 1000);
-          formattedDate = format(fallbackDate, 'MMM dd');
-        }
-        
+      .map(item => {
+        const date = new Date(item.date);
         return {
           date: item.date,
-          nav: parseFloat(item.nav) || 100,
-          formattedDate
+          nav: parseFloat(item.nav),
+          formattedDate: isNaN(date.getTime()) ? item.date : format(date, 'MMM dd')
         };
       })
       .reverse();
@@ -141,7 +127,7 @@ export default function SchemeDetailPage({ params }) {
   }
 
   if (!schemeData?.meta) {
-    return <Alert severity="error">Scheme not found</Alert>;
+    return <Alert severity="error">Scheme not found or failed to load data from MFAPI.in</Alert>;
   }
 
   return (
@@ -190,10 +176,10 @@ export default function SchemeDetailPage({ params }) {
                       <TableRow key={period}>
                         <TableCell>{period.toUpperCase()}</TableCell>
                         <TableCell align="right">
-                          {data.returns ? `${data.returns.toFixed(2)}%` : 'N/A'}
+                          {data.simpleReturn ? `${data.simpleReturn}%` : 'N/A'}
                         </TableCell>
                         <TableCell align="right">
-                          {data.returns ? `${(data.returns * 1.2).toFixed(2)}%` : 'N/A'}
+                          {data.annualizedReturn ? `${data.annualizedReturn}%` : 'N/A'}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -224,11 +210,11 @@ export default function SchemeDetailPage({ params }) {
         </Grid>
 
         <Grid item xs={12}>
-          <LumpsumCalculator schemeCode={resolvedParams.code} />
+          <LumpsumCalculator schemeCode={code} />
         </Grid>
 
         <Grid item xs={12}>
-          <SWPCalculator schemeCode={resolvedParams.code} />
+          <SWPCalculator schemeCode={code} />
         </Grid>
 
         <Grid item xs={12}>
@@ -314,7 +300,7 @@ export default function SchemeDetailPage({ params }) {
                       <CardContent>
                         <Typography variant="body2" color="text.secondary">Absolute Return</Typography>
                         <Typography variant="h6" color={sipResult.absoluteReturn >= 0 ? 'success.main' : 'error.main'}>
-                          {sipResult.absoluteReturn}%
+                          {sipResult.absoluteReturn?.toFixed(2)}%
                         </Typography>
                       </CardContent>
                     </Card>
@@ -324,7 +310,7 @@ export default function SchemeDetailPage({ params }) {
                       <CardContent>
                         <Typography variant="body2" color="text.secondary">Annualized Return</Typography>
                         <Typography variant="h6" color={sipResult.annualizedReturn >= 0 ? 'success.main' : 'error.main'}>
-                          {sipResult.annualizedReturn}%
+                          {sipResult.annualizedReturn?.toFixed(2)}%
                         </Typography>
                       </CardContent>
                     </Card>

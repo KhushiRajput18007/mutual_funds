@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card, CardContent, Typography, TextField, Button, Grid,
   CircularProgress, Box, Alert
 } from '@mui/material';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function LumpsumCalculator({ schemeCode }) {
   const [lumpsumForm, setLumpsumForm] = useState({
@@ -15,6 +16,12 @@ export default function LumpsumCalculator({ schemeCode }) {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (lumpsumForm.amount > 0) {
+      calculateLumpsum();
+    }
+  }, [lumpsumForm.amount, lumpsumForm.from, lumpsumForm.to]);
 
   const calculateLumpsum = async () => {
     setLoading(true);
@@ -96,36 +103,54 @@ export default function LumpsumCalculator({ schemeCode }) {
         {error && <Alert severity="error" style={{ marginBottom: '16px' }}>{error}</Alert>}
 
         {result && (
-          <Grid container spacing={2}>
-            <Grid item xs={6} md={3}>
-              <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                <Typography variant="body2" color="text.secondary">Invested</Typography>
-                <Typography variant="h6">₹{result.invested?.toLocaleString()}</Typography>
-              </Box>
+          <>
+            <Grid container spacing={2} style={{ marginBottom: '24px' }}>
+              <Grid item xs={6} md={3}>
+                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                  <Typography variant="body2" color="text.secondary">Invested</Typography>
+                  <Typography variant="h6">₹{result.invested?.toLocaleString()}</Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={6} md={3}>
+                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                  <Typography variant="body2" color="text.secondary">Current Value</Typography>
+                  <Typography variant="h6">₹{result.currentValue?.toLocaleString()}</Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={6} md={3}>
+                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                  <Typography variant="body2" color="text.secondary">Absolute Return</Typography>
+                  <Typography variant="h6" color={result.absoluteReturn >= 0 ? 'success.main' : 'error.main'}>
+                    {result.absoluteReturn?.toFixed(2)}%
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={6} md={3}>
+                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                  <Typography variant="body2" color="text.secondary">Annualized Return</Typography>
+                  <Typography variant="h6" color={result.annualizedReturn >= 0 ? 'success.main' : 'error.main'}>
+                    {result.annualizedReturn?.toFixed(2)}%
+                  </Typography>
+                </Box>
+              </Grid>
             </Grid>
-            <Grid item xs={6} md={3}>
-              <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                <Typography variant="body2" color="text.secondary">Current Value</Typography>
-                <Typography variant="h6">₹{result.currentValue?.toLocaleString()}</Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={6} md={3}>
-              <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                <Typography variant="body2" color="text.secondary">Absolute Return</Typography>
-                <Typography variant="h6" color={result.absoluteReturn >= 0 ? 'success.main' : 'error.main'}>
-                  {result.absoluteReturn?.toFixed(2)}%
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={6} md={3}>
-              <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                <Typography variant="body2" color="text.secondary">Annualized Return</Typography>
-                <Typography variant="h6" color={result.annualizedReturn >= 0 ? 'success.main' : 'error.main'}>
-                  {result.annualizedReturn?.toFixed(2)}%
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
+            
+            <Box style={{ width: '100%', height: 300 }}>
+              <Typography variant="h6" gutterBottom>Investment Comparison</Typography>
+              <ResponsiveContainer>
+                <BarChart data={[
+                  { name: 'Invested', amount: result.invested },
+                  { name: 'Current Value', amount: result.currentValue }
+                ]}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
+                  <Bar dataKey="amount" fill="#1976d2" />
+                </BarChart>
+              </ResponsiveContainer>
+            </Box>
+          </>
         )}
       </CardContent>
     </Card>

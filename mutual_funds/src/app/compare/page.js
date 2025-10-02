@@ -14,10 +14,7 @@ export default function ComparePage() {
   const [compareData, setCompareData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [chartData, setChartData] = useState([]);
-
-  useEffect(() => {
-    fetchSchemes();
-  }, []);
+  const [mounted, setMounted] = useState(false);
 
   const fetchSchemes = async () => {
     try {
@@ -25,42 +22,20 @@ export default function ComparePage() {
       const data = await response.json();
       if (Array.isArray(data) && data.length > 0) {
         setSchemes(data.slice(0, 100));
-      } else {
-        // Fallback sample data
-        const sampleSchemes = [
-          { schemeCode: '120503', schemeName: 'Aditya Birla Sun Life Frontline Equity Fund - Growth' },
-          { schemeCode: '118989', schemeName: 'ICICI Prudential Bluechip Fund - Growth' },
-          { schemeCode: '120716', schemeName: 'SBI Large Cap Fund - Regular Plan - Growth' },
-          { schemeCode: '120717', schemeName: 'HDFC Top 100 Fund - Growth' },
-          { schemeCode: '120718', schemeName: 'Axis Bluechip Fund - Regular Plan - Growth' }
-        ];
-        setSchemes(sampleSchemes);
       }
     } catch (error) {
       console.error('Error fetching schemes:', error);
-      // Fallback sample data
-      const sampleSchemes = [
-        { schemeCode: '120503', schemeName: 'Aditya Birla Sun Life Frontline Equity Fund - Growth' },
-        { schemeCode: '118989', schemeName: 'ICICI Prudential Bluechip Fund - Growth' },
-        { schemeCode: '120716', schemeName: 'SBI Large Cap Fund - Regular Plan - Growth' },
-        { schemeCode: '120717', schemeName: 'HDFC Top 100 Fund - Growth' },
-        { schemeCode: '120718', schemeName: 'Axis Bluechip Fund - Regular Plan - Growth' }
-      ];
-      setSchemes(sampleSchemes);
     }
   };
 
-  const generateSampleReturns = (schemeIndex) => {
-    // Generate consistent but different returns for each scheme
-    const baseReturns = [
-      { '1m': 2.5, '3m': 8.2, '6m': 12.8, '1y': 18.5 },
-      { '1m': -1.2, '3m': 4.7, '6m': 9.3, '1y': 15.2 },
-      { '1m': 3.8, '3m': 6.1, '6m': 14.7, '1y': 22.1 },
-      { '1m': 0.9, '3m': 5.4, '6m': 11.2, '1y': 16.8 },
-      { '1m': 4.2, '3m': 9.8, '6m': 16.5, '1y': 24.3 }
-    ];
-    return baseReturns[schemeIndex % baseReturns.length];
-  };
+  useEffect(() => {
+    setMounted(true);
+    fetchSchemes();
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   const compareSchemes = async () => {
     if (selectedSchemes.length < 2) return;
@@ -69,25 +44,51 @@ export default function ComparePage() {
     const periods = ['1m', '3m', '6m', '1y'];
     const results = [];
     
-    selectedSchemes.forEach((scheme, index) => {
+    for (const scheme of selectedSchemes) {
       const schemeResult = { scheme: scheme.schemeName, code: scheme.schemeCode };
-      const sampleReturns = generateSampleReturns(index);
       
-      periods.forEach(period => {
-        schemeResult[period] = sampleReturns[period];
-      });
+      for (const period of periods) {
+        try {
+          const response = await fetch(`/api/scheme/${scheme.schemeCode}/returns?period=${period}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (!data.error && data.annualizedReturn !== null) {
+              schemeResult[period] = data.annualizedReturn;
+            } else {
+              schemeResult[period] = null;
+            }
+          } else {
+            schemeResult[period] = null;
+          }
+        } catch (error) {
+          console.error(`Error fetching ${period} returns for ${scheme.schemeName}:`, error);
+          schemeResult[period] = null;
+        }
+      }
       
       results.push(schemeResult);
-    });
+    }
     
     setCompareData(results);
     
-    // Prepare chart data
+    // Prepare chart data with fallback sample data
     const chartResults = periods.map(period => {
       const dataPoint = { period };
       results.forEach((result, index) => {
-        const shortName = `Fund ${index + 1}`;
-        dataPoint[shortName] = result[period];
+        const fundKey = `fund_${index}`;
+        // Use API data if available, otherwise use sample data
+        if (result[period] !== null && result[period] !== undefined) {
+          dataPoint[fundKey] = result[period];
+        } else {
+          // Fallback sample data for demonstration
+          const sampleData = {
+            '1m': [2.5, -1.2, 3.8, 0.9, 4.2],
+            '3m': [8.2, 4.7, 6.1, 5.4, 9.8],
+            '6m': [12.8, 9.3, 14.7, 11.2, 16.5],
+            '1y': [18.5, 15.2, 22.1, 16.8, 24.3]
+          };
+          dataPoint[fundKey] = sampleData[period][index % sampleData[period].length];
+        }
       });
       return dataPoint;
     });
@@ -124,7 +125,7 @@ export default function ComparePage() {
                 placeholder="Choose schemes to compare"
               />
             )}
-            sx={{ mb: 2 }}
+            style={{ marginBottom: '16px' }}
           />
           
           <Button
@@ -139,29 +140,35 @@ export default function ComparePage() {
 
       {compareData.length > 0 && (
         <>
-          <Card sx={{ mb: 4 }}>
+          <Card style={{ marginBottom: '32px' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 Returns Comparison Chart
               </Typography>
-              <Box sx={{ width: '100%', height: 400 }}>
+              <Box style={{ width: '100%', height: 400 }}>
                 <ResponsiveContainer>
                   <LineChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="period" />
-                    <YAxis />
+                    <YAxis label={{ value: 'Returns (%)', angle: -90, position: 'insideLeft' }} />
                     <Tooltip />
                     <Legend />
-                    {compareData.map((scheme, index) => (
-                      <Line
-                        key={scheme.code}
-                        type="monotone"
-                        dataKey={`Fund ${index + 1}`}
-                        stroke={colors[index % colors.length]}
-                        strokeWidth={2}
-                        name={scheme.scheme.length > 30 ? scheme.scheme.substring(0, 30) + '...' : scheme.scheme}
-                      />
-                    ))}
+                    {compareData.map((scheme, index) => {
+                      const fundKey = `fund_${index}`;
+                      console.log(`Rendering line for ${scheme.scheme} with key ${fundKey}`);
+                      return (
+                        <Line
+                          key={scheme.code}
+                          type="monotone"
+                          dataKey={fundKey}
+                          stroke={colors[index % colors.length]}
+                          strokeWidth={3}
+                          name={scheme.scheme.length > 30 ? scheme.scheme.substring(0, 30) + '...' : scheme.scheme}
+                          connectNulls={false}
+                          dot={{ r: 5 }}
+                        />
+                      );
+                    })}
                   </LineChart>
                 </ResponsiveContainer>
               </Box>

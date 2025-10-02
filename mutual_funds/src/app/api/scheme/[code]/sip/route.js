@@ -83,7 +83,7 @@ function calculateSIP(navData, amount, frequency, fromDate, toDate) {
 
 export async function POST(request, { params }) {
   try {
-    const { code } = params;
+    const { code } = await params;
     const body = await request.json();
     const { amount, frequency, from, to } = body;
     
@@ -107,6 +107,7 @@ export async function POST(request, { params }) {
     
     return NextResponse.json(sipResult);
   } catch (error) {
+    console.error('SIP calculation error:', error);
     return NextResponse.json({ error: 'Failed to calculate SIP' }, { status: 500 });
   }
 }

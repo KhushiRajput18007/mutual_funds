@@ -45,7 +45,7 @@ function calculateReturns(navData, startDate, endDate) {
 
 export async function GET(request, { params }) {
   try {
-    const { code } = params;
+    const { code } = await params;
     const { searchParams } = new URL(request.url);
     
     // Get scheme data
@@ -97,6 +97,7 @@ export async function GET(request, { params }) {
     
     return NextResponse.json(returns);
   } catch (error) {
+    console.error('Returns calculation error:', error);
     return NextResponse.json({ error: 'Failed to calculate returns' }, { status: 500 });
   }
 }

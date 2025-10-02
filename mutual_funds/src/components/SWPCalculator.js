@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card, CardContent, Typography, TextField, Button, Grid,
   CircularProgress, Box, Alert, FormControl, InputLabel, Select, MenuItem
 } from '@mui/material';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function SWPCalculator({ schemeCode }) {
   const [swpForm, setSwpForm] = useState({
@@ -17,6 +18,12 @@ export default function SWPCalculator({ schemeCode }) {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (swpForm.initialInvestment > 0 && swpForm.withdrawalAmount > 0) {
+      calculateSWP();
+    }
+  }, [swpForm.initialInvestment, swpForm.withdrawalAmount, swpForm.frequency, swpForm.from, swpForm.to]);
 
   const calculateSWP = async () => {
     setLoading(true);
@@ -114,7 +121,8 @@ export default function SWPCalculator({ schemeCode }) {
         remainingUnits: parseFloat(remainingUnits.toFixed(4)),
         totalValue: parseFloat(totalValue.toFixed(2)),
         withdrawals: withdrawals.length,
-        avgWithdrawal: withdrawals.length > 0 ? parseFloat((totalWithdrawn / withdrawals.length).toFixed(2)) : 0
+        avgWithdrawal: withdrawals.length > 0 ? parseFloat((totalWithdrawn / withdrawals.length).toFixed(2)) : 0,
+        withdrawalData: withdrawals
       });
       
     } catch (error) {
@@ -198,44 +206,70 @@ export default function SWPCalculator({ schemeCode }) {
         {error && <Alert severity="error" style={{ marginBottom: '16px' }}>{error}</Alert>}
 
         {result && (
-          <Grid container spacing={2}>
-            <Grid item xs={6} md={2}>
-              <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                <Typography variant="body2" color="text.secondary">Initial Investment</Typography>
-                <Typography variant="h6">₹{result.initialInvestment?.toLocaleString()}</Typography>
-              </Box>
+          <>
+            <Grid container spacing={2} style={{ marginBottom: '24px' }}>
+              <Grid item xs={6} md={2}>
+                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                  <Typography variant="body2" color="text.secondary">Initial Investment</Typography>
+                  <Typography variant="h6">₹{result.initialInvestment?.toLocaleString()}</Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={6} md={2}>
+                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                  <Typography variant="body2" color="text.secondary">Total Withdrawn</Typography>
+                  <Typography variant="h6">₹{result.totalWithdrawn?.toLocaleString()}</Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={6} md={2}>
+                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                  <Typography variant="body2" color="text.secondary">Remaining Value</Typography>
+                  <Typography variant="h6">₹{result.remainingValue?.toLocaleString()}</Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={6} md={2}>
+                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                  <Typography variant="body2" color="text.secondary">Total Value</Typography>
+                  <Typography variant="h6">₹{result.totalValue?.toLocaleString()}</Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={6} md={2}>
+                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                  <Typography variant="body2" color="text.secondary">Withdrawals</Typography>
+                  <Typography variant="h6">{result.withdrawals}</Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={6} md={2}>
+                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                  <Typography variant="body2" color="text.secondary">Avg Withdrawal</Typography>
+                  <Typography variant="h6">₹{result.avgWithdrawal?.toLocaleString()}</Typography>
+                </Box>
+              </Grid>
             </Grid>
-            <Grid item xs={6} md={2}>
-              <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                <Typography variant="body2" color="text.secondary">Total Withdrawn</Typography>
-                <Typography variant="h6">₹{result.totalWithdrawn?.toLocaleString()}</Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={6} md={2}>
-              <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                <Typography variant="body2" color="text.secondary">Remaining Value</Typography>
-                <Typography variant="h6">₹{result.remainingValue?.toLocaleString()}</Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={6} md={2}>
-              <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                <Typography variant="body2" color="text.secondary">Total Value</Typography>
-                <Typography variant="h6">₹{result.totalValue?.toLocaleString()}</Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={6} md={2}>
-              <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                <Typography variant="body2" color="text.secondary">Withdrawals</Typography>
-                <Typography variant="h6">{result.withdrawals}</Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={6} md={2}>
-              <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                <Typography variant="body2" color="text.secondary">Avg Withdrawal</Typography>
-                <Typography variant="h6">₹{result.avgWithdrawal?.toLocaleString()}</Typography>
-              </Box>
-            </Grid>
-          </Grid>
+            
+            <Box style={{ width: '100%', height: 400 }}>
+              <Typography variant="h6" gutterBottom>SWP Withdrawal Pattern</Typography>
+              <ResponsiveContainer>
+                <LineChart data={result.withdrawalData?.map((withdrawal, index) => {
+                  const cumulativeWithdrawn = result.withdrawalData.slice(0, index + 1).reduce((sum, w) => sum + w.amount, 0);
+                  const remainingValue = result.initialInvestment - cumulativeWithdrawn;
+                  return {
+                    date: withdrawal.date,
+                    withdrawn: withdrawal.amount,
+                    cumulativeWithdrawn,
+                    remainingValue: Math.max(0, remainingValue)
+                  };
+                }) || []}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
+                  <Line type="monotone" dataKey="withdrawn" stroke="#ff7300" strokeWidth={2} name="Withdrawal Amount" />
+                  <Line type="monotone" dataKey="cumulativeWithdrawn" stroke="#8884d8" strokeWidth={2} name="Cumulative Withdrawn" />
+                  <Line type="monotone" dataKey="remainingValue" stroke="#1976d2" strokeWidth={2} name="Remaining Value" />
+                </LineChart>
+              </ResponsiveContainer>
+            </Box>
+          </>
         )}
       </CardContent>
     </Card>
