@@ -7,11 +7,21 @@ import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleSearch = (e) => {
+    if (e) e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/funds?search=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      router.push('/funds');
+    }
+  };
 
   if (!mounted) {
     return null;
@@ -20,8 +30,7 @@ export default function Home() {
   const stats = [
     { label: 'Total Funds', value: '2,500+', icon: <TrendingUp /> },
     { label: 'Fund Houses', value: '45+', icon: <Security /> },
-    { label: 'AUM Tracked', value: '₹50L Cr', icon: <PieChart /> },
-    { label: 'Active Users', value: '1M+', icon: <Star /> }
+    { label: 'AUM Tracked', value: '₹50L Cr', icon: <PieChart /> }
   ];
 
   const features = [
@@ -59,9 +68,9 @@ export default function Home() {
           variant="h2" 
           component="h1" 
           sx={{ 
-            fontWeight: 800, 
+            fontWeight: 700, 
             mb: 3,
-            background: 'linear-gradient(45deg, #00d4ff 30%, #ff6b35 90%)',
+            background: 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
             backgroundClip: 'text',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
@@ -70,7 +79,7 @@ export default function Home() {
           Smart Mutual Fund Investing
         </Typography>
         
-        <Typography variant="h5" color="text.secondary" sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
+        <Typography variant="h5" color="text.secondary" sx={{ mb: 4, maxWidth: 600, mx: 'auto', lineHeight: 1.4 }}>
           Discover, analyze, and track mutual funds with AI-powered insights and real-time data
         </Typography>
 
@@ -78,11 +87,22 @@ export default function Home() {
           <TextField
             placeholder="Search funds, AMCs, or categories..."
             variant="outlined"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSearch();
+              }
+            }}
             sx={{ 
-              width: { xs: '100%', sm: 400 },
+              width: { xs: '100%', sm: 450 },
               '& .MuiOutlinedInput-root': {
                 borderRadius: 3,
-                backgroundColor: 'background.paper'
+                backgroundColor: 'background.paper',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  boxShadow: 1
+                }
               }
             }}
             InputProps={{
@@ -91,6 +111,18 @@ export default function Home() {
                   <Search color="action" />
                 </InputAdornment>
               ),
+              endAdornment: searchQuery && (
+                <InputAdornment position="end">
+                  <Button 
+                    variant="contained"
+                    size="small"
+                    onClick={handleSearch}
+                    sx={{ minWidth: 'auto', px: 2 }}
+                  >
+                    Go
+                  </Button>
+                </InputAdornment>
+              )
             }}
           />
         </Box>
@@ -100,7 +132,17 @@ export default function Home() {
             variant="contained" 
             size="large"
             onClick={() => router.push('/funds')}
-            sx={{ px: 4, py: 1.5, borderRadius: 3 }}
+            sx={{ 
+              px: 4, 
+              py: 1.5, 
+              borderRadius: 3,
+              fontWeight: 600,
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                transform: 'translateY(-1px)',
+                boxShadow: 3
+              }
+            }}
           >
             Start Exploring
           </Button>
@@ -108,7 +150,17 @@ export default function Home() {
             variant="outlined" 
             size="large"
             onClick={() => router.push('/compare')}
-            sx={{ px: 4, py: 1.5, borderRadius: 3 }}
+            sx={{ 
+              px: 4, 
+              py: 1.5, 
+              borderRadius: 3,
+              fontWeight: 600,
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                transform: 'translateY(-1px)',
+                boxShadow: 2
+              }
+            }}
           >
             Compare Funds
           </Button>
@@ -118,15 +170,24 @@ export default function Home() {
       {/* Statistics */}
       <Grid container spacing={3} sx={{ mb: 8 }}>
         {stats.map((stat, index) => (
-          <Grid item xs={6} md={3} key={index}>
-            <Card sx={{ textAlign: 'center', p: 3, borderRadius: 3 }}>
-              <Avatar sx={{ bgcolor: 'primary.main', mx: 'auto', mb: 2 }}>
+          <Grid item xs={12} md={4} key={index}>
+            <Card sx={{ 
+              textAlign: 'center', 
+              p: 3, 
+              borderRadius: 3,
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: 4
+              }
+            }}>
+              <Avatar sx={{ bgcolor: 'primary.main', mx: 'auto', mb: 2, width: 56, height: 56 }}>
                 {stat.icon}
               </Avatar>
-              <Typography variant="h4" fontWeight="bold" color="primary">
+              <Typography variant="h4" fontWeight="bold" color="primary" sx={{ mb: 1 }}>
                 {stat.value}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body1" color="text.secondary" fontWeight={500}>
                 {stat.label}
               </Typography>
             </Card>
@@ -156,14 +217,22 @@ export default function Home() {
               <Typography variant="h5" component="h3" gutterBottom fontWeight="bold">
                 {feature.title}
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.5 }}>
                 {feature.description}
               </Typography>
               <Button 
                 variant={feature.variant}
                 fullWidth
                 onClick={feature.action}
-                sx={{ borderRadius: 2, py: 1.5 }}
+                sx={{ 
+                  borderRadius: 2, 
+                  py: 1.5,
+                  fontWeight: 600,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    transform: 'translateY(-1px)'
+                  }
+                }}
               >
                 {feature.buttonText}
               </Button>
@@ -174,13 +243,31 @@ export default function Home() {
 
       {/* Trust Indicators */}
       <Card sx={{ p: 4, borderRadius: 3, textAlign: 'center', mb: 4 }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" gutterBottom fontWeight={600}>
           Trusted by investors across India
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap', mt: 2 }}>
-          <Chip icon={<Security />} label="Bank-grade Security" color="primary" variant="outlined" />
-          <Chip icon={<Speed />} label="Real-time Data" color="secondary" variant="outlined" />
-          <Chip icon={<Star />} label="Expert Insights" color="success" variant="outlined" />
+          <Chip 
+            icon={<Security />} 
+            label="Bank-grade Security" 
+            color="primary" 
+            variant="outlined"
+            sx={{ fontWeight: 500 }}
+          />
+          <Chip 
+            icon={<Speed />} 
+            label="Real-time Data" 
+            color="secondary" 
+            variant="outlined"
+            sx={{ fontWeight: 500 }}
+          />
+          <Chip 
+            icon={<Star />} 
+            label="Expert Insights" 
+            color="success" 
+            variant="outlined"
+            sx={{ fontWeight: 500 }}
+          />
         </Box>
       </Card>
     </Container>

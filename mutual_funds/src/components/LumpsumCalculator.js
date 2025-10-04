@@ -104,39 +104,47 @@ export default function LumpsumCalculator({ schemeCode }) {
 
         {result && (
           <>
-            <Grid container spacing={2} style={{ marginBottom: '24px' }}>
-              <Grid item xs={6} md={3}>
-                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                  <Typography variant="body2" color="text.secondary">Invested</Typography>
-                  <Typography variant="h6">₹{result.invested?.toLocaleString()}</Typography>
-                </Box>
+            <Typography variant="h6" gutterBottom style={{ marginTop: '24px', marginBottom: '16px', color: '#1976d2' }}>
+              Lumpsum Results
+            </Typography>
+            <Grid container spacing={3} style={{ marginBottom: '32px' }}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card elevation={3} style={{ background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)', color: 'white' }}>
+                  <CardContent style={{ textAlign: 'center', padding: '20px' }}>
+                    <Typography variant="body2" style={{ opacity: 0.9, marginBottom: '8px' }}>Invested</Typography>
+                    <Typography variant="h5" style={{ fontWeight: 'bold' }}>₹{result.invested?.toLocaleString()}</Typography>
+                  </CardContent>
+                </Card>
               </Grid>
-              <Grid item xs={6} md={3}>
-                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                  <Typography variant="body2" color="text.secondary">Current Value</Typography>
-                  <Typography variant="h6">₹{result.currentValue?.toLocaleString()}</Typography>
-                </Box>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card elevation={3} style={{ background: 'linear-gradient(135deg, #388e3c 0%, #66bb6a 100%)', color: 'white' }}>
+                  <CardContent style={{ textAlign: 'center', padding: '20px' }}>
+                    <Typography variant="body2" style={{ opacity: 0.9, marginBottom: '8px' }}>Current Value</Typography>
+                    <Typography variant="h5" style={{ fontWeight: 'bold' }}>₹{result.currentValue?.toLocaleString()}</Typography>
+                  </CardContent>
+                </Card>
               </Grid>
-              <Grid item xs={6} md={3}>
-                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                  <Typography variant="body2" color="text.secondary">Absolute Return</Typography>
-                  <Typography variant="h6" color={result.absoluteReturn >= 0 ? 'success.main' : 'error.main'}>
-                    {result.absoluteReturn?.toFixed(2)}%
-                  </Typography>
-                </Box>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card elevation={3} style={{ background: result.absoluteReturn >= 0 ? 'linear-gradient(135deg, #f57c00 0%, #ffb74d 100%)' : 'linear-gradient(135deg, #d32f2f 0%, #ef5350 100%)', color: 'white' }}>
+                  <CardContent style={{ textAlign: 'center', padding: '20px' }}>
+                    <Typography variant="body2" style={{ opacity: 0.9, marginBottom: '8px' }}>Absolute Return</Typography>
+                    <Typography variant="h5" style={{ fontWeight: 'bold' }}>{result.absoluteReturn?.toFixed(2)}%</Typography>
+                  </CardContent>
+                </Card>
               </Grid>
-              <Grid item xs={6} md={3}>
-                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                  <Typography variant="body2" color="text.secondary">Annualized Return</Typography>
-                  <Typography variant="h6" color={result.annualizedReturn >= 0 ? 'success.main' : 'error.main'}>
-                    {result.annualizedReturn?.toFixed(2)}%
-                  </Typography>
-                </Box>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card elevation={3} style={{ background: result.annualizedReturn >= 0 ? 'linear-gradient(135deg, #7b1fa2 0%, #ba68c8 100%)' : 'linear-gradient(135deg, #d32f2f 0%, #ef5350 100%)', color: 'white' }}>
+                  <CardContent style={{ textAlign: 'center', padding: '20px' }}>
+                    <Typography variant="body2" style={{ opacity: 0.9, marginBottom: '8px' }}>Annualized Return</Typography>
+                    <Typography variant="h5" style={{ fontWeight: 'bold' }}>{result.annualizedReturn?.toFixed(2)}%</Typography>
+                  </CardContent>
+                </Card>
               </Grid>
             </Grid>
             
-            <Box style={{ width: '100%', height: 300 }}>
-              <Typography variant="h6" gutterBottom>Investment Comparison</Typography>
+            <Card elevation={2} style={{ padding: '24px', marginTop: '16px' }}>
+              <Typography variant="h6" gutterBottom style={{ color: '#1976d2', marginBottom: '20px' }}>Investment Comparison</Typography>
+              <Box style={{ width: '100%', height: 300 }}>
               <ResponsiveContainer>
                 <BarChart data={[
                   { name: 'Invested', amount: result.invested },
@@ -149,7 +157,8 @@ export default function LumpsumCalculator({ schemeCode }) {
                   <Bar dataKey="amount" fill="#1976d2" />
                 </BarChart>
               </ResponsiveContainer>
-            </Box>
+              </Box>
+            </Card>
           </>
         )}
       </CardContent>

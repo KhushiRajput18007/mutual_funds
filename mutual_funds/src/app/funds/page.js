@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function FundsPage() {
   const [schemes, setSchemes] = useState([]);
@@ -18,10 +18,16 @@ export default function FundsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [itemsToShow, setItemsToShow] = useState(6);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     fetchSchemes();
-  }, []);
+    // Get search query from URL parameters
+    const searchQuery = searchParams.get('search');
+    if (searchQuery) {
+      setSearchTerm(searchQuery);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     filterSchemes();

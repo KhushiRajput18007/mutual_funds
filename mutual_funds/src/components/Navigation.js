@@ -11,17 +11,42 @@ import {
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
+import { useTheme } from './ThemeProvider';
 
 export default function Navigation() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [notificationAnchor, setNotificationAnchor] = useState(null);
   const [mounted, setMounted] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const router = useRouter();
   const pathname = usePathname();
+  const { mode, toggleTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 15 * 60 * 1000); // Refresh every 15 minutes
+    return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    // Refresh notifications when user opens the dropdown
+    if (notificationAnchor) {
+      fetchNotifications();
+    }
+  }, [notificationAnchor]);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch('/api/notifications');
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
 
   if (!mounted) {
     return (
@@ -127,7 +152,7 @@ export default function Navigation() {
               onClick={handleNotificationClick}
               sx={{ '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' } }}
             >
-              <Badge badgeContent={3} color="error">
+              <Badge badgeContent={notifications.length} color="error">
                 <Notifications />
               </Badge>
             </IconButton>
@@ -159,13 +184,13 @@ export default function Navigation() {
             }
           }}
         >
-          <MenuItem onClick={handleClose}>
+          <MenuItem onClick={() => { handleClose(); router.push('/profile'); }}>
             <AccountCircle sx={{ mr: 2 }} />
             Profile Settings
           </MenuItem>
-          <MenuItem onClick={handleClose}>
-            <DarkMode sx={{ mr: 2 }} />
-            Dark Mode
+          <MenuItem onClick={() => { handleClose(); toggleTheme(); }}>
+            {mode === 'dark' ? <LightMode sx={{ mr: 2 }} /> : <DarkMode sx={{ mr: 2 }} />}
+            {mode === 'dark' ? 'Light Mode' : 'Dark Mode'}
           </MenuItem>
           <MenuItem onClick={handleClose}>
             Sign Out
@@ -186,85 +211,41 @@ export default function Navigation() {
             }
           }}
         >
-          {/* Market Alerts */}
-          <MenuItem onClick={handleNotificationClose} sx={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-              <Avatar sx={{ bgcolor: 'success.main', mr: 2, width: 32, height: 32 }}>📈</Avatar>
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="subtitle2" fontWeight="bold">NIFTY 50 Surge</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Index up 2.8% - Best performing sectors: IT, Banking
-                </Typography>
-                <Typography variant="caption" color="primary.main">2 mins ago</Typography>
+          {notifications.map((notification, index) => (
+            <MenuItem 
+              key={notification.id} 
+              onClick={handleNotificationClose} 
+              sx={{ borderBottom: index < notifications.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none' }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                <Avatar sx={{ 
+                  bgcolor: notification.type === 'success' ? 'success.main' : 
+                           notification.type === 'warning' ? 'warning.main' : 'info.main', 
+                  mr: 2, 
+                  width: 32, 
+                  height: 32 
+                }}>
+                  {notification.icon}
+                </Avatar>
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography variant="subtitle2" fontWeight="bold">{notification.title}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {notification.message}
+                  </Typography>
+                  <Typography variant="caption" color="primary.main">{notification.time}</Typography>
+                </Box>
               </Box>
-            </Box>
-          </MenuItem>
-          
-          <MenuItem onClick={handleNotificationClose} sx={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-              <Avatar sx={{ bgcolor: 'warning.main', mr: 2, width: 32, height: 32 }}>⚠️</Avatar>
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="subtitle2" fontWeight="bold">Volatility Alert</Typography>
+            </MenuItem>
+          ))}
+          {notifications.length === 0 && (
+            <MenuItem onClick={handleNotificationClose}>
+              <Box sx={{ textAlign: 'center', width: '100%', py: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Mid-cap funds showing high volatility - Consider rebalancing
+                  No new notifications
                 </Typography>
-                <Typography variant="caption" color="primary.main">15 mins ago</Typography>
               </Box>
-            </Box>
-          </MenuItem>
-
-          <MenuItem onClick={handleNotificationClose} sx={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-              <Avatar sx={{ bgcolor: 'info.main', mr: 2, width: 32, height: 32 }}>💰</Avatar>
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="subtitle2" fontWeight="bold">SIP Opportunity</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Large-cap funds at attractive valuations for SIP entry
-                </Typography>
-                <Typography variant="caption" color="primary.main">1 hour ago</Typography>
-              </Box>
-            </Box>
-          </MenuItem>
-
-          {/* Portfolio Updates */}
-          <MenuItem onClick={handleNotificationClose} sx={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-              <Avatar sx={{ bgcolor: 'success.main', mr: 2, width: 32, height: 32 }}>📊</Avatar>
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="subtitle2" fontWeight="bold">Portfolio Gain</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Your portfolio gained ₹8,450 today (+1.2%)
-                </Typography>
-                <Typography variant="caption" color="primary.main">Today</Typography>
-              </Box>
-            </Box>
-          </MenuItem>
-
-          <MenuItem onClick={handleNotificationClose} sx={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-              <Avatar sx={{ bgcolor: 'secondary.main', mr: 2, width: 32, height: 32 }}>🎯</Avatar>
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="subtitle2" fontWeight="bold">Goal Achievement</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Retirement fund is 68% complete - On track!
-                </Typography>
-                <Typography variant="caption" color="primary.main">Yesterday</Typography>
-              </Box>
-            </Box>
-          </MenuItem>
-
-          <MenuItem onClick={handleNotificationClose}>
-            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-              <Avatar sx={{ bgcolor: 'error.main', mr: 2, width: 32, height: 32 }}>🔔</Avatar>
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="subtitle2" fontWeight="bold">Rebalancing Alert</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Equity allocation at 78% - Consider rebalancing
-                </Typography>
-                <Typography variant="caption" color="primary.main">2 days ago</Typography>
-              </Box>
-            </Box>
-          </MenuItem>
+            </MenuItem>
+          )}
         </Menu>
       </Toolbar>
     </AppBar>

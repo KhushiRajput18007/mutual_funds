@@ -207,47 +207,63 @@ export default function SWPCalculator({ schemeCode }) {
 
         {result && (
           <>
-            <Grid container spacing={2} style={{ marginBottom: '24px' }}>
-              <Grid item xs={6} md={2}>
-                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                  <Typography variant="body2" color="text.secondary">Initial Investment</Typography>
-                  <Typography variant="h6">₹{result.initialInvestment?.toLocaleString()}</Typography>
-                </Box>
+            <Typography variant="h6" gutterBottom style={{ marginTop: '24px', marginBottom: '16px', color: '#1976d2' }}>
+              SWP Results
+            </Typography>
+            <Grid container spacing={3} style={{ marginBottom: '32px' }}>
+              <Grid item xs={12} sm={6} md={4}>
+                <Card elevation={3} style={{ background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)', color: 'white' }}>
+                  <CardContent style={{ textAlign: 'center', padding: '20px' }}>
+                    <Typography variant="body2" style={{ opacity: 0.9, marginBottom: '8px' }}>Initial Investment</Typography>
+                    <Typography variant="h5" style={{ fontWeight: 'bold' }}>₹{result.initialInvestment?.toLocaleString()}</Typography>
+                  </CardContent>
+                </Card>
               </Grid>
-              <Grid item xs={6} md={2}>
-                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                  <Typography variant="body2" color="text.secondary">Total Withdrawn</Typography>
-                  <Typography variant="h6">₹{result.totalWithdrawn?.toLocaleString()}</Typography>
-                </Box>
+              <Grid item xs={12} sm={6} md={4}>
+                <Card elevation={3} style={{ background: 'linear-gradient(135deg, #388e3c 0%, #66bb6a 100%)', color: 'white' }}>
+                  <CardContent style={{ textAlign: 'center', padding: '20px' }}>
+                    <Typography variant="body2" style={{ opacity: 0.9, marginBottom: '8px' }}>Total Withdrawn</Typography>
+                    <Typography variant="h5" style={{ fontWeight: 'bold' }}>₹{result.totalWithdrawn?.toLocaleString()}</Typography>
+                  </CardContent>
+                </Card>
               </Grid>
-              <Grid item xs={6} md={2}>
-                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                  <Typography variant="body2" color="text.secondary">Remaining Value</Typography>
-                  <Typography variant="h6">₹{result.remainingValue?.toLocaleString()}</Typography>
-                </Box>
+              <Grid item xs={12} sm={6} md={4}>
+                <Card elevation={3} style={{ background: 'linear-gradient(135deg, #f57c00 0%, #ffb74d 100%)', color: 'white' }}>
+                  <CardContent style={{ textAlign: 'center', padding: '20px' }}>
+                    <Typography variant="body2" style={{ opacity: 0.9, marginBottom: '8px' }}>Remaining Value</Typography>
+                    <Typography variant="h5" style={{ fontWeight: 'bold' }}>₹{result.remainingValue?.toLocaleString()}</Typography>
+                  </CardContent>
+                </Card>
               </Grid>
-              <Grid item xs={6} md={2}>
-                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                  <Typography variant="body2" color="text.secondary">Total Value</Typography>
-                  <Typography variant="h6">₹{result.totalValue?.toLocaleString()}</Typography>
-                </Box>
+              <Grid item xs={12} sm={6} md={4}>
+                <Card elevation={3} style={{ background: 'linear-gradient(135deg, #7b1fa2 0%, #ba68c8 100%)', color: 'white' }}>
+                  <CardContent style={{ textAlign: 'center', padding: '20px' }}>
+                    <Typography variant="body2" style={{ opacity: 0.9, marginBottom: '8px' }}>Total Value</Typography>
+                    <Typography variant="h5" style={{ fontWeight: 'bold' }}>₹{result.totalValue?.toLocaleString()}</Typography>
+                  </CardContent>
+                </Card>
               </Grid>
-              <Grid item xs={6} md={2}>
-                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                  <Typography variant="body2" color="text.secondary">Withdrawals</Typography>
-                  <Typography variant="h6">{result.withdrawals}</Typography>
-                </Box>
+              <Grid item xs={12} sm={6} md={4}>
+                <Card elevation={3} style={{ background: 'linear-gradient(135deg, #d32f2f 0%, #ef5350 100%)', color: 'white' }}>
+                  <CardContent style={{ textAlign: 'center', padding: '20px' }}>
+                    <Typography variant="body2" style={{ opacity: 0.9, marginBottom: '8px' }}>Total Withdrawals</Typography>
+                    <Typography variant="h5" style={{ fontWeight: 'bold' }}>{result.withdrawals}</Typography>
+                  </CardContent>
+                </Card>
               </Grid>
-              <Grid item xs={6} md={2}>
-                <Box style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                  <Typography variant="body2" color="text.secondary">Avg Withdrawal</Typography>
-                  <Typography variant="h6">₹{result.avgWithdrawal?.toLocaleString()}</Typography>
-                </Box>
+              <Grid item xs={12} sm={6} md={4}>
+                <Card elevation={3} style={{ background: 'linear-gradient(135deg, #00796b 0%, #4db6ac 100%)', color: 'white' }}>
+                  <CardContent style={{ textAlign: 'center', padding: '20px' }}>
+                    <Typography variant="body2" style={{ opacity: 0.9, marginBottom: '8px' }}>Avg Withdrawal</Typography>
+                    <Typography variant="h5" style={{ fontWeight: 'bold' }}>₹{result.avgWithdrawal?.toLocaleString()}</Typography>
+                  </CardContent>
+                </Card>
               </Grid>
             </Grid>
             
-            <Box style={{ width: '100%', height: 400 }}>
-              <Typography variant="h6" gutterBottom>SWP Withdrawal Pattern</Typography>
+            <Card elevation={2} style={{ padding: '24px', marginTop: '16px' }}>
+              <Typography variant="h6" gutterBottom style={{ color: '#1976d2', marginBottom: '20px' }}>SWP Withdrawal Pattern</Typography>
+              <Box style={{ width: '100%', height: 400 }}>
               <ResponsiveContainer>
                 <LineChart data={result.withdrawalData?.map((withdrawal, index) => {
                   const cumulativeWithdrawn = result.withdrawalData.slice(0, index + 1).reduce((sum, w) => sum + w.amount, 0);
@@ -268,7 +284,8 @@ export default function SWPCalculator({ schemeCode }) {
                   <Line type="monotone" dataKey="remainingValue" stroke="#1976d2" strokeWidth={2} name="Remaining Value" />
                 </LineChart>
               </ResponsiveContainer>
-            </Box>
+              </Box>
+            </Card>
           </>
         )}
       </CardContent>

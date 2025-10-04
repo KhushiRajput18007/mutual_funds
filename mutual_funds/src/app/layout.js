@@ -15,14 +15,9 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={inter.className}>
         <MUIThemeProvider>
-          <div style={{ 
-            minHeight: '100vh',
-            background: 'linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #2d3748 100%)',
-          }}>
-            <Navigation />
-            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 16px' }}>
-              {children}
-            </div>
+          <Navigation />
+          <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '80px 16px 0 16px' }}>
+            {children}
           </div>
         </MUIThemeProvider>
       </body>

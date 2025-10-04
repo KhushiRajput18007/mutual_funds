@@ -278,44 +278,45 @@ export default function SchemeDetailPage({ params }) {
               </Button>
 
               {sipResult && (
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography variant="body2" color="text.secondary">Total Invested</Typography>
-                        <Typography variant="h6">₹{sipResult.totalInvested?.toLocaleString()}</Typography>
-                      </CardContent>
-                    </Card>
+                <>
+                  <Typography variant="h6" gutterBottom style={{ marginTop: '24px', marginBottom: '16px', color: '#1976d2' }}>
+                    SIP Results
+                  </Typography>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Card elevation={3} style={{ background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)', color: 'white' }}>
+                        <CardContent style={{ textAlign: 'center', padding: '20px' }}>
+                          <Typography variant="body2" style={{ opacity: 0.9, marginBottom: '8px' }}>Total Invested</Typography>
+                          <Typography variant="h5" style={{ fontWeight: 'bold' }}>₹{sipResult.totalInvested?.toLocaleString()}</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Card elevation={3} style={{ background: 'linear-gradient(135deg, #388e3c 0%, #66bb6a 100%)', color: 'white' }}>
+                        <CardContent style={{ textAlign: 'center', padding: '20px' }}>
+                          <Typography variant="body2" style={{ opacity: 0.9, marginBottom: '8px' }}>Current Value</Typography>
+                          <Typography variant="h5" style={{ fontWeight: 'bold' }}>₹{sipResult.currentValue?.toLocaleString()}</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Card elevation={3} style={{ background: sipResult.absoluteReturn >= 0 ? 'linear-gradient(135deg, #f57c00 0%, #ffb74d 100%)' : 'linear-gradient(135deg, #d32f2f 0%, #ef5350 100%)', color: 'white' }}>
+                        <CardContent style={{ textAlign: 'center', padding: '20px' }}>
+                          <Typography variant="body2" style={{ opacity: 0.9, marginBottom: '8px' }}>Absolute Return</Typography>
+                          <Typography variant="h5" style={{ fontWeight: 'bold' }}>{sipResult.absoluteReturn?.toFixed(2)}%</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Card elevation={3} style={{ background: sipResult.annualizedReturn >= 0 ? 'linear-gradient(135deg, #7b1fa2 0%, #ba68c8 100%)' : 'linear-gradient(135deg, #d32f2f 0%, #ef5350 100%)', color: 'white' }}>
+                        <CardContent style={{ textAlign: 'center', padding: '20px' }}>
+                          <Typography variant="body2" style={{ opacity: 0.9, marginBottom: '8px' }}>Annualized Return</Typography>
+                          <Typography variant="h5" style={{ fontWeight: 'bold' }}>{sipResult.annualizedReturn?.toFixed(2)}%</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography variant="body2" color="text.secondary">Current Value</Typography>
-                        <Typography variant="h6">₹{sipResult.currentValue?.toLocaleString()}</Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography variant="body2" color="text.secondary">Absolute Return</Typography>
-                        <Typography variant="h6" color={sipResult.absoluteReturn >= 0 ? 'success.main' : 'error.main'}>
-                          {sipResult.absoluteReturn?.toFixed(2)}%
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography variant="body2" color="text.secondary">Annualized Return</Typography>
-                        <Typography variant="h6" color={sipResult.annualizedReturn >= 0 ? 'success.main' : 'error.main'}>
-                          {sipResult.annualizedReturn?.toFixed(2)}%
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                </Grid>
+                </>
               )}
             </CardContent>
           </Card>
