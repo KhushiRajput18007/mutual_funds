@@ -11,6 +11,8 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { format, subYears } from 'date-fns';
 import LumpsumCalculator from '../../../components/LumpsumCalculator';
 import SWPCalculator from '../../../components/SWPCalculator';
+import StepUpSIPCalculator from '../../../components/StepUpSIPCalculator';
+import StepUpSWPCalculator from '../../../components/StepUpSWPCalculator';
 
 export default function SchemeDetailPage({ params }) {
   const { code } = use(params);
@@ -215,6 +217,14 @@ export default function SchemeDetailPage({ params }) {
 
         <Grid item xs={12}>
           <SWPCalculator schemeCode={code} />
+        </Grid>
+
+        <Grid item xs={12}>
+          <StepUpSIPCalculator schemeCode={code} />
+        </Grid>
+
+        <Grid item xs={12}>
+          <StepUpSWPCalculator schemeCode={code} />
         </Grid>
 
         <Grid item xs={12}>

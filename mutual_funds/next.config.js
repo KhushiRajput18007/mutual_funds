@@ -1,6 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  outputFileTracingRoot: __dirname
-};
+  experimental: {
+    outputFileTracingRoot: undefined,
+  },
+  generateBuildId: async () => {
+    return 'build-' + Date.now()
+  },
+  trailingSlash: false,
+  output: 'standalone'
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig

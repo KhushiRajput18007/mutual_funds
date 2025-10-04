@@ -80,7 +80,8 @@ export default function Navigation() {
   const navItems = [
     { label: 'Explore', path: '/funds', icon: <Search /> },
     { label: 'Compare', path: '/compare', icon: <Compare /> },
-    { label: 'Portfolio', path: '/portfolio', icon: <PieChart /> }
+    { label: 'Portfolio', path: '/portfolio', icon: <PieChart /> },
+    { label: 'Peer Analysis', path: '/peer-comparison', icon: <TrendingUp /> }
   ];
 
   return (

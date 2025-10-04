@@ -20,19 +20,34 @@ A comprehensive Next.js application for exploring mutual funds with advanced cal
 ## Technology Stack
 
 - **Frontend**: Next.js 15, React 19, Material-UI (MUI)
+- **Backend**: Node.js with Next.js API routes
+- **Database**: MongoDB Atlas (Cloud)
 - **Charts**: Recharts, MUI X-Charts
 - **Styling**: Material-UI components with responsive design
 - **Data Source**: MFAPI.in public APIs
-- **Caching**: In-memory caching for API responses
+- **Caching**: MongoDB-based intelligent caching
+- **AI**: Google Gemini API for notifications
 
 ## API Endpoints
 
 ### Backend API Routes
 
-1. **GET /api/mf** - List all mutual fund schemes
-2. **GET /api/scheme/[code]** - Get scheme details and NAV history
+#### Core APIs (Enhanced with MongoDB)
+1. **GET /api/mf** - List all mutual fund schemes (cached in MongoDB)
+2. **GET /api/scheme/[code]** - Get scheme details and NAV history (cached in MongoDB)
 3. **GET /api/scheme/[code]/returns** - Calculate returns for specific periods
 4. **POST /api/scheme/[code]/sip** - Calculate SIP returns
+5. **POST /api/scheme/[code]/stepup-sip** - Calculate step-up SIP returns
+6. **POST /api/scheme/[code]/stepup-swp** - Calculate step-up SWP returns
+
+#### New MongoDB-Powered APIs
+7. **GET/POST/PUT/DELETE /api/portfolio** - Portfolio management
+8. **GET/POST/PUT /api/users** - User profile management
+9. **GET/POST/DELETE /api/calculations** - Save/retrieve calculation history
+10. **GET /api/analytics** - Dashboard analytics and insights
+11. **GET /api/notifications** - AI-generated market notifications
+12. **POST /api/init-db** - Initialize database indexes
+13. **GET /api/peer-comparison** - Fund peer comparison
 
 ### Query Parameters
 
@@ -46,35 +61,56 @@ A comprehensive Next.js application for exploring mutual funds with advanced cal
    npm install
    ```
 
-2. **Run Development Server**
+2. **Initialize MongoDB Database**
    ```bash
+   # Start the development server first
    npm run dev
+   
+   # Then initialize the database (one-time setup)
+   curl -X POST http://localhost:3000/api/init-db
    ```
 
 3. **Open Browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
+### MongoDB Configuration
+- **Database**: MongoDB Atlas Cloud
+- **Connection**: Automatically configured in `/src/lib/mongodb.js`
+- **Collections**: Auto-created with proper indexes
+- **Data**: Populated automatically from MFAPI.in
+
 ## Project Structure
 
 ```
 src/
-├── api/                    # API routes
-│   ├── mf/                # List all schemes
-│   └── scheme/            # Scheme-specific endpoints
-│       └── [code]/
-│           ├── route.js   # Scheme details
-│           ├── returns/   # Returns calculation
-│           └── sip/       # SIP calculation
-├── app/                   # Next.js app directory
+├── lib/                   # Database and utilities
+│   ├── mongodb.js        # MongoDB connection
+│   └── models.js         # Database models and indexes
+├── app/
+│   ├── api/              # API routes
+│   │   ├── mf/           # List all schemes (MongoDB cached)
+│   │   ├── scheme/[code]/ # Scheme-specific endpoints
+│   │   ├── portfolio/    # Portfolio CRUD operations
+│   │   ├── users/        # User management
+│   │   ├── calculations/ # Calculation history
+│   │   ├── analytics/    # Dashboard analytics
+│   │   ├── notifications/ # AI-powered notifications
+│   │   ├── peer-comparison/ # Fund comparison
+│   │   └── init-db/      # Database initialization
 │   ├── funds/            # Fund listing page
 │   ├── scheme/[code]/    # Scheme detail page
 │   ├── compare/          # Fund comparison page
 │   ├── portfolio/        # Portfolio tracker
+│   ├── peer-comparison/  # Peer comparison page
 │   ├── layout.js         # Root layout with MUI theme
 │   └── page.js           # Home page
 └── components/           # Reusable components
     ├── LumpsumCalculator.js
-    └── SWPCalculator.js
+    ├── SWPCalculator.js
+    ├── StepUpSIPCalculator.js
+    ├── StepUpSWPCalculator.js
+    ├── Navigation.js
+    └── ThemeProvider.js
 ```
 
 ## Key Features Explained
@@ -102,11 +138,24 @@ src/
 - **SWP**: Systematic withdrawal planning for retirement
 - **Returns**: Historical performance analysis
 
-## Data Caching
+## Data Storage & Caching
 
-- Scheme list cached for 24 hours
+### MongoDB Collections
+- **schemes**: All mutual fund schemes with metadata
+- **scheme_data**: Cached scheme details and NAV history
+- **nav_history**: Individual NAV records for performance analysis
+- **portfolios**: User portfolio holdings and transactions
+- **users**: User profiles and investment preferences
+- **calculations**: Saved SIP/Lumpsum/SWP calculation results
+- **notifications**: AI-generated market alerts and insights
+
+### Intelligent Caching Strategy
+- Scheme list cached for 24 hours in MongoDB
 - Individual scheme data cached for 12 hours
-- Improves performance and reduces API calls
+- Market data cached for 8 minutes for real-time notifications
+- NAV history stored permanently for historical analysis
+- Automatic cleanup of old notifications (keeps last 100)
+- Improves performance and reduces external API calls
 
 ## Responsive Design
 

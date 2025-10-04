@@ -3,33 +3,23 @@ import { NextResponse } from 'next/server';
 const GEMINI_API_KEY = 'AIzaSyCqzP_IV9UNRTKW2OUdnLMkcK5q49cQC3E';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
 
-let notificationCache = [];
-let marketDataCache = null;
-let lastNotificationTypes = [];
 const CACHE_DURATION = 8 * 60 * 1000; // 8 minutes
 const MARKET_DATA_CACHE_DURATION = 8 * 60 * 1000; // 8 minutes
 
 export async function GET() {
   try {
-    const now = Date.now();
-    const recentNotifications = notificationCache.filter(
-      notification => now - notification.timestamp < CACHE_DURATION
-    );
-
-    if (recentNotifications.length > 0) {
-      return NextResponse.json(recentNotifications);
-    }
-
-    // Fetch fresh market data
+    console.log('Generating fresh notifications with live market data...');
+    
     const marketData = await getMarketData();
     const notifications = await generateNotifications(marketData);
     
-    notificationCache = notifications.map(notification => ({
+    const notificationsWithTimestamp = notifications.map(notification => ({
       ...notification,
-      timestamp: now
+      timestamp: Date.now(),
+      createdAt: new Date()
     }));
 
-    return NextResponse.json(notificationCache);
+    return NextResponse.json(notificationsWithTimestamp);
   } catch (error) {
     console.error('Error generating notifications:', error);
     return NextResponse.json({ error: 'Failed to generate notifications' }, { status: 500 });
@@ -37,19 +27,13 @@ export async function GET() {
 }
 
 async function getMarketData() {
-  const now = Date.now();
-  
-  if (marketDataCache && (now - marketDataCache.timestamp < MARKET_DATA_CACHE_DURATION)) {
-    return marketDataCache.data;
-  }
+  console.log('Fetching live market data from MFAPI.in...');
 
   try {
-    // Fetch top performing funds data
     const fundsResponse = await fetch('https://api.mfapi.in/mf');
     const allFunds = await fundsResponse.json();
     
-    // Get sample of different fund categories
-    const sampleFunds = allFunds.slice(0, 10);
+    const sampleFunds = allFunds.slice(0, 15);
     const fundPerformance = [];
     
     for (const fund of sampleFunds) {
@@ -76,7 +60,7 @@ async function getMarketData() {
       }
     }
     
-    const marketData = {
+    return {
       topPerformers: fundPerformance.filter(f => f.change > 0).sort((a, b) => b.change - a.change).slice(0, 5),
       underPerformers: fundPerformance.filter(f => f.change < 0).sort((a, b) => a.change - b.change).slice(0, 3),
       categories: [...new Set(fundPerformance.map(f => f.category))],
@@ -85,13 +69,6 @@ async function getMarketData() {
       volatileCategories: [...new Set(fundPerformance.filter(f => Math.abs(f.change) > 2).map(f => f.category))],
       stablePerformers: fundPerformance.filter(f => f.change > 0 && f.change < 1).slice(0, 3)
     };
-    
-    marketDataCache = {
-      data: marketData,
-      timestamp: now
-    };
-    
-    return marketData;
   } catch (error) {
     console.error('Error fetching market data:', error);
     return null;
@@ -251,8 +228,5 @@ async function generateNotifications(marketData) {
     });
   }
 
-  // Store notification types for variety in next cycle
-  lastNotificationTypes = notifications.map(n => n.title);
-  
   return notifications.slice(0, 8); // Limit to 8 notifications
 }
