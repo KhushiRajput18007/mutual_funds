@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import {
   Typography, TextField, Grid, Card, CardContent, CardActionArea,
   Box, Chip, CircularProgress, InputAdornment, Container, Paper,
@@ -10,7 +10,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function FundsPage() {
+function FundsContent() {
   const [schemes, setSchemes] = useState([]);
   const [filteredSchemes, setFilteredSchemes] = useState([]);
   const [displayedSchemes, setDisplayedSchemes] = useState([]);
@@ -215,5 +215,20 @@ export default function FundsPage() {
         )}
       </Stack>
     </Container>
+  );
+}
+
+export default function FundsPage() {
+  return (
+    <Suspense fallback={
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Box textAlign="center">
+          <CircularProgress size={60} />
+          <Typography variant="h6" sx={{ mt: 2 }}>Loading funds...</Typography>
+        </Box>
+      </Container>
+    }>
+      <FundsContent />
+    </Suspense>
   );
 }
