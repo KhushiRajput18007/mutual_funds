@@ -1,13 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    outputFileTracingRoot: undefined,
-  },
   generateBuildId: async () => {
     return 'build-' + Date.now()
   },
   trailingSlash: false,
-  output: 'standalone'
+  output: 'standalone',
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'reasonable-harlequin-ex4bber2my.edgeone.app' },
+    ],
+  },
 }
 
 module.exports = nextConfig

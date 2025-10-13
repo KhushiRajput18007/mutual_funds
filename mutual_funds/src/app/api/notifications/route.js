@@ -22,7 +22,12 @@ export async function GET() {
     return NextResponse.json(notificationsWithTimestamp);
   } catch (error) {
     console.error('Error generating notifications:', error);
-    return NextResponse.json({ error: 'Failed to generate notifications' }, { status: 500 });
+    // Fallback to a small static set so UI doesn't break
+    const fallback = [
+      { id: 'fallback_mkt', title: 'Market Pulse', message: 'Markets mixed today; SIP remains a steady approach for long-term goals.', type: 'info', icon: '📊', time: 'Just now' },
+      { id: 'fallback_sip', title: 'SIP Tip', message: 'Consider setting up SIPs in diversified equity funds to average costs over time.', type: 'success', icon: '💰', time: '1 min ago' }
+    ];
+    return NextResponse.json(fallback);
   }
 }
 
@@ -30,15 +35,38 @@ async function getMarketData() {
   console.log('Fetching live market data from MFAPI.in...');
 
   try {
-    const fundsResponse = await fetch('https://api.mfapi.in/mf');
-    const allFunds = await fundsResponse.json();
+    // Add timeout + small retry for resilience
+    const listUrl = 'https://api.mfapi.in/mf';
+    const maxRetries = 1;
+    const timeoutMs = 10000; // 10s
+    let allFunds = [];
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        const fundsResponse = await fetch(listUrl, { signal: controller.signal, cache: 'no-store' });
+        clearTimeout(timer);
+        if (!fundsResponse.ok) {
+          console.warn('MFAPI list non-OK:', fundsResponse.status);
+          if (attempt < maxRetries) continue; else return null;
+        }
+        allFunds = await fundsResponse.json();
+        break;
+      } catch (e) {
+        console.warn('MFAPI list fetch error attempt', attempt + 1, e?.code || '', e?.message || '');
+        if (attempt === maxRetries) return null;
+      }
+    }
     
-    const sampleFunds = allFunds.slice(0, 15);
+    const sampleFunds = Array.isArray(allFunds) ? allFunds.slice(0, 12) : [];
     const fundPerformance = [];
     
     for (const fund of sampleFunds) {
       try {
-        const perfResponse = await fetch(`https://api.mfapi.in/mf/${fund.schemeCode}`);
+        const perfController = new AbortController();
+        const perfTimer = setTimeout(() => perfController.abort(), timeoutMs);
+        const perfResponse = await fetch(`https://api.mfapi.in/mf/${fund.schemeCode}`, { signal: perfController.signal, cache: 'no-store' });
+        clearTimeout(perfTimer);
         if (perfResponse.ok) {
           const perfData = await perfResponse.json();
           if (perfData.data && perfData.data.length > 1) {
@@ -160,7 +188,20 @@ async function generateNotifications(marketData) {
   const selectedPrompts = prompts.slice(0, 6);
   const selectedTypes = notificationTypes.slice(0, 6);
   
+  const canCallGemini = typeof GEMINI_API_KEY === 'string' && GEMINI_API_KEY && GEMINI_API_KEY !== 'YOUR_API_KEY';
   for (let i = 0; i < selectedPrompts.length; i++) {
+    if (!canCallGemini) {
+      // Fallback: synthesize short messages locally when API key missing
+      notifications.push({
+        id: `notif_local_${Date.now()}_${i}`,
+        title: selectedTypes[i]?.title || 'Market Update',
+        message: selectedPrompts[i].slice(0, 90).replace(/Generate .*?\./, '').trim() || 'Market update available.',
+        type: selectedTypes[i]?.type || 'info',
+        icon: selectedTypes[i]?.icon || '📈',
+        time: `${Math.floor(Math.random() * 45) + 5} mins ago`
+      });
+      continue;
+    }
     try {
       const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
         method: 'POST',

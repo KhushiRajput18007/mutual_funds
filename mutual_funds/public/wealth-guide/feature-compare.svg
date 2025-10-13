@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <defs>
+    <linearGradient id="g1" x1="0" x2="1">
+      <stop offset="0" stop-color="#0ea5e9"/>
+      <stop offset="1" stop-color="#22c55e"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" rx="16" fill="#0b1220"/>
+  <rect x="40" y="60" width="720" height="280" rx="12" fill="#111827" stroke="#1f2937"/>
+  <rect x="60" y="100" width="300" height="200" rx="8" fill="#0f172a"/>
+  <rect x="440" y="100" width="300" height="200" rx="8" fill="#0f172a"/>
+  <path d="M80 260 C140 200, 220 220, 340 160" stroke="url(#g1)" stroke-width="6" fill="none"/>
+  <path d="M460 280 C520 220, 600 240, 720 180" stroke="#f59e0b" stroke-width="6" fill="none"/>
+  <text x="60" y="90" font-size="18" font-family="Inter, Arial" fill="#9ca3af">Feature: Compare</text>
+</svg>

@@ -27,7 +27,8 @@
     "react-dom": "19.1.0",
     "recharts": "^2.13.3",
     "@fontsource/caveat": "^5.0.0",
-    "@fontsource/kalam": "^5.0.0"
+    "@fontsource/kalam": "^5.0.0",
+    "node-cron": "^3.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

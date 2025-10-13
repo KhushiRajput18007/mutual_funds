@@ -4,10 +4,11 @@ import { useState, useEffect, Suspense } from 'react';
 import {
   Typography, TextField, Grid, Card, CardContent, CardActionArea,
   Box, Chip, CircularProgress, InputAdornment, Container, Paper,
-  Skeleton, Stack, Fade, Button
+  Skeleton, Stack, Fade, Button, IconButton, Tooltip, Snackbar
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 function FundsContent() {
@@ -19,6 +20,21 @@ function FundsContent() {
   const [itemsToShow, setItemsToShow] = useState(6);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [snack, setSnack] = useState({ open: false, msg: '' });
+
+  const addToWatchlist = async (s) => {
+    try {
+      const res = await fetch('/api/watchlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-user-id': 'demo-user' },
+        body: JSON.stringify({ schemeCode: s.schemeCode, schemeName: s.schemeName })
+      });
+      if (!res.ok) throw new Error('failed');
+      setSnack({ open: true, msg: 'Added to watchlist' });
+    } catch (error) {
+      setSnack({ open: true, msg: 'Failed to add to watchlist' });
+    }
+  };
 
   useEffect(() => {
     fetchSchemes();
@@ -39,16 +55,28 @@ function FundsContent() {
 
   const fetchSchemes = async () => {
     try {
-      const response = await fetch('/api/mf');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      // 1) Try active funds API (DB-backed)
+      const resActive = await fetch('/api/active-funds');
+      const dataActive = resActive.ok ? await resActive.json() : [];
+      if (Array.isArray(dataActive) && dataActive.length > 0) {
+        console.log('Using active-funds:', dataActive.length);
+        setSchemes(dataActive);
+        setFilteredSchemes(dataActive);
+        setLoading(false);
+        return;
       }
-      const data = await response.json();
-      console.log('Fetched data:', data?.length || 0, 'schemes');
-      
-      if (Array.isArray(data) && data.length > 0) {
-        setSchemes(data);
-        setFilteredSchemes(data);
+
+      // 2) Fallback to direct MF API if active-funds is empty/unavailable
+      const resAll = await fetch('/api/mf');
+      if (resAll.ok) {
+        const dataAll = await resAll.json();
+        console.log('Fallback /api/mf count:', dataAll?.length || 0);
+        if (Array.isArray(dataAll) && dataAll.length > 0) {
+          setSchemes(dataAll);
+          setFilteredSchemes(dataAll);
+        }
+      } else {
+        console.warn('Fallback /api/mf unavailable:', resAll.status);
       }
     } catch (error) {
       console.error('Error fetching schemes:', error);
@@ -93,13 +121,19 @@ function FundsContent() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Snackbar
+        open={snack.open}
+        autoHideDuration={2000}
+        onClose={() => setSnack({ ...snack, open: false })}
+        message={snack.msg}
+      />
       <Stack spacing={4}>
         <Box textAlign="center">
           <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 700, color: 'primary.main' }}>
             Mutual Funds Explorer
           </Typography>
           <Typography variant="h6" color="text.secondary">
-            Discover and explore thousands of mutual fund schemes
+            Discover and explore today's active mutual fund schemes
           </Typography>
         </Box>
         
@@ -131,7 +165,7 @@ function FundsContent() {
             </Typography>
             <Chip 
               icon={<TrendingUpIcon />} 
-              label="Live Data" 
+              label={schemes.length > 0 && schemes[0]?.date ? 'Active Today' : 'Live Data'} 
               color="success" 
               variant="outlined" 
             />
@@ -154,9 +188,17 @@ function FundsContent() {
                           transform: 'translateY(-4px)',
                           boxShadow: 6
                         },
-                        borderRadius: 2
+                        borderRadius: 2,
+                        position: 'relative'
                       }}
                     >
+                      <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }}>
+                        <Tooltip title="Add to Watchlist">
+                          <IconButton size="small" onClick={(e) => { e.stopPropagation(); addToWatchlist(scheme); }} aria-label="add-to-watchlist">
+                            <BookmarkAddOutlinedIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
                       <CardActionArea 
                         onClick={() => handleSchemeClick(scheme.schemeCode)}
                         sx={{ height: '100%', p: 0 }}

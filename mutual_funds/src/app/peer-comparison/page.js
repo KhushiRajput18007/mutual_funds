@@ -139,7 +139,7 @@ export default function PeerComparisonPage() {
                   <TableBody>
                     {data.schemes.map((scheme, index) => (
                       <TableRow 
-                        key={scheme.schemeCode}
+                        key={`${scheme.schemeCode}-${index}`}
                         sx={{ 
                           '&:nth-of-type(odd)': { backgroundColor: 'action.hover' },
                           '&:hover': { backgroundColor: 'action.selected' }

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <rect width="800" height="400" rx="16" fill="#0b1220"/>
+  <rect x="60" y="80" width="680" height="240" rx="12" fill="#0f172a" stroke="#1f2937"/>
+  <circle cx="180" cy="260" r="60" fill="#22d3ee" opacity="0.6"/>
+  <circle cx="340" cy="220" r="80" fill="#38bdf8" opacity="0.6"/>
+  <circle cx="520" cy="200" r="100" fill="#6366f1" opacity="0.6"/>
+  <text x="60" y="70" font-size="18" font-family="Inter, Arial" fill="#9ca3af">Feature: SIP Tools</text>
+</svg>

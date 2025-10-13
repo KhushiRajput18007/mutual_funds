@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import { 
   Notifications, AccountCircle, TrendingUp, Compare, PieChart, 
-  Search, DarkMode, LightMode
+  Search, DarkMode, LightMode, BookmarkBorder
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
@@ -16,14 +16,12 @@ import { useTheme } from './ThemeProvider';
 export default function Navigation() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [notificationAnchor, setNotificationAnchor] = useState(null);
-  const [mounted, setMounted] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const router = useRouter();
   const pathname = usePathname();
   const { mode, toggleTheme } = useTheme();
 
   useEffect(() => {
-    setMounted(true);
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 15 * 60 * 1000); // Refresh every 15 minutes
     return () => clearInterval(interval);
@@ -48,18 +46,7 @@ export default function Navigation() {
     }
   };
 
-  if (!mounted) {
-    return (
-      <AppBar position="fixed" sx={{ backdropFilter: 'blur(20px)', backgroundColor: 'rgba(26, 31, 46, 0.9)' }}>
-        <Toolbar sx={{ px: { xs: 2, md: 4 } }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-            <TrendingUp sx={{ mr: 1, color: 'primary.main' }} />
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>MF Explorer</Typography>
-          </Box>
-        </Toolbar>
-      </AppBar>
-    );
-  }
+  // Render identical structure on server and client to avoid hydration mismatches
 
   const handleProfileClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -80,6 +67,7 @@ export default function Navigation() {
   const navItems = [
     { label: 'Explore', path: '/funds', icon: <Search /> },
     { label: 'Compare', path: '/compare', icon: <Compare /> },
+    { label: 'Watchlist', path: '/watchlist', icon: <BookmarkBorder /> },
     { label: 'Portfolio', path: '/portfolio', icon: <PieChart /> },
     { label: 'Peer Analysis', path: '/peer-comparison', icon: <TrendingUp /> }
   ];
