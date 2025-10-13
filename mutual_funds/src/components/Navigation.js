@@ -35,14 +35,19 @@ export default function Navigation() {
   }, [notificationAnchor]);
 
   const fetchNotifications = async () => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10000);
     try {
-      const response = await fetch('/api/notifications');
+      const response = await fetch('/api/notifications', { signal: controller.signal, cache: 'no-store' });
+      clearTimeout(timer);
       if (response.ok) {
         const data = await response.json();
-        setNotifications(data);
+        setNotifications(Array.isArray(data) ? data : []);
+      } else {
+        setNotifications([]);
       }
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
+    } catch (_) {
+      setNotifications([]);
     }
   };
 

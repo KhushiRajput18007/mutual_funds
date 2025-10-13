@@ -131,7 +131,7 @@ export default function WealthGuidePage() {
           <Stack spacing={1} sx={{ mb: 2 }}>
             <Typography variant="overline" color="primary">{afDate ? `Active on ${afDate}` : 'Active (previous day)'}</Typography>
             <Typography variant="h4" sx={{ fontWeight: 800 }}>Trending active funds</Typography>
-            <Typography variant="body2" color="text.secondary">Based on yesterday's snapshot</Typography>
+            <Typography variant="body2" color="text.secondary">Based on yesterday&apos;s snapshot</Typography>
           </Stack>
 
           {afLoading ? (

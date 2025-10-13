@@ -133,7 +133,7 @@ function FundsContent() {
             Mutual Funds Explorer
           </Typography>
           <Typography variant="h6" color="text.secondary">
-            Discover and explore today's active mutual fund schemes
+            Discover and explore today&apos;s active mutual fund schemes
           </Typography>
         </Box>
         
