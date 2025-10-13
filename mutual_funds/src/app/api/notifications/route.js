@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const GEMINI_API_KEY = 'AIzaSyCqzP_IV9UNRTKW2OUdnLMkcK5q49cQC3E';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
 
 const CACHE_DURATION = 8 * 60 * 1000; // 8 minutes
