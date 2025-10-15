@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 function Card({ fund, onClick }) {
   const isUp = typeof fund?.navChangePercent === 'number' && fund.navChangePercent >= 0;
@@ -118,8 +119,8 @@ export default function TrendingActivePage() {
         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">Trending & Active Mutual Funds</h1>
         <p className="text-zinc-600 dark:text-zinc-400 mt-2">Daily updates powered by MFAPI and user engagement.</p>
         <div className="mt-4 flex gap-2">
-          <a href="/" className="text-sm underline">Home</a>
-          <a href="/funds" className="text-sm underline">Browse Funds</a>
+          <Link href="/" className="text-sm underline">Home</Link>
+          <Link href="/funds" className="text-sm underline">Browse Funds</Link>
         </div>
       </header>
 

@@ -30,7 +30,9 @@ import {
   Tab,
   useMediaQuery,
   LinearProgress,
-  Alert
+  Alert,
+  Card,
+  CardContent
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';

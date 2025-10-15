@@ -81,7 +81,7 @@ export default function ActiveFundsDemoPage() {
           
           <Alert severity="info" sx={{ maxWidth: 800, mx: 'auto', mb: 4 }}>
             <Typography variant="body2">
-              <strong>How it works:</strong> We filter mutual funds from the MFAPI by checking the 'isinGrowth' field. 
+              <strong>How it works:</strong> We filter mutual funds from the MFAPI by checking the &#39;isinGrowth&#39; field. 
               Funds with non-null isinGrowth values are considered active, while those with null values are inactive.
             </Typography>
           </Alert>
