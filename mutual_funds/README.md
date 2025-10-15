@@ -119,7 +119,7 @@ src/
 - Uses historical NAV data to simulate actual SIP investments
 - Supports monthly, quarterly, and yearly frequencies
 - Calculates absolute and annualized returns
-- Shows investment growth over time
+- Shows investment growth over the time
 
 ### Portfolio Tracker
 - Add and track multiple mutual fund holdings
