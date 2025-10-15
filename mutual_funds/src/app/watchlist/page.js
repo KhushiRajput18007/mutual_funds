@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Container, Typography, Box, Card, CardContent, Grid, Chip, Button, CircularProgress, TextField, Stack } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Container, Typography, Box, Card, CardContent, Grid, Chip, Button, CircularProgress, TextField, Stack, CardActionArea } from '@mui/material';
+import { motion } from 'framer-motion';
 
 const PERIODS = [
   { key: '1d', label: '1D' },
@@ -12,9 +14,14 @@ const PERIODS = [
 ];
 
 export default function WatchlistPage() {
+  const router = useRouter();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ schemeCode: '', schemeName: '' });
+
+  const handleFundClick = (schemeCode) => {
+    router.push(`/scheme/${schemeCode}`);
+  };
 
   useEffect(() => {
     load();
@@ -129,14 +136,34 @@ export default function WatchlistPage() {
         <Grid container spacing={3}>
           {items.map((it) => (
             <Grid item xs={12} md={6} lg={4} key={it.schemeCode}>
-              <Card sx={{ borderRadius: 3 }}>
+              <Card 
+                sx={{ 
+                  borderRadius: 3, 
+                  cursor: 'pointer',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    transition: 'transform 0.2s ease-in-out',
+                    boxShadow: 3
+                  }
+                }}
+                onClick={() => handleFundClick(it.schemeCode)}
+              >
                 <CardContent>
                   <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
                     <Box>
                       <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{it.schemeName}</Typography>
                       <Chip size="small" label={it.schemeCode} sx={{ mt: 0.5 }} />
                     </Box>
-                    <Button size="small" color="error" onClick={() => remove(it.schemeCode)}>Remove</Button>
+                    <Button 
+                      size="small" 
+                      color="error" 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        remove(it.schemeCode); 
+                      }}
+                    >
+                      Remove
+                    </Button>
                   </Box>
                   <Box display="flex" gap={1} flexWrap="wrap">
                     {PERIODS.map((p) => {

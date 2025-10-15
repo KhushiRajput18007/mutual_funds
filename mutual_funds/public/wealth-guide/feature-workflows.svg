@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" fill="none">
+  <circle cx="60" cy="60" r="50" fill="rgba(168, 85, 247, 0.1)" stroke="rgba(168, 85, 247, 0.3)" stroke-width="2"/>
+  <circle cx="60" cy="60" r="12" fill="#a855f7"/>
+  <line x1="60" y1="60" x2="60" y2="25" stroke="rgba(168, 85, 247, 0.4)" stroke-width="2"/>
+  <line x1="60" y1="60" x2="95" y2="60" stroke="rgba(168, 85, 247, 0.4)" stroke-width="2"/>
+  <line x1="60" y1="60" x2="60" y2="95" stroke="rgba(168, 85, 247, 0.4)" stroke-width="2"/>
+  <line x1="60" y1="60" x2="25" y2="60" stroke="rgba(168, 85, 247, 0.4)" stroke-width="2"/>
+  <circle cx="60" cy="25" r="8" fill="#3b82f6"/>
+  <circle cx="95" cy="60" r="8" fill="#10b981"/>
+  <circle cx="60" cy="95" r="8" fill="#f59e0b"/>
+  <circle cx="25" cy="60" r="8" fill="#ec4899"/>
+  <text x="60" y="10" font-size="10" fill="#3b82f6" text-anchor="middle" font-weight="600">Goal</text>
+  <text x="110" y="65" font-size="10" fill="#10b981" text-anchor="middle" font-weight="600">Watch</text>
+  <text x="60" y="115" font-size="10" fill="#f59e0b" text-anchor="middle" font-weight="600">Alert</text>
+  <text x="10" y="65" font-size="10" fill="#ec4899" text-anchor="middle" font-weight="600">Plan</text>
+</svg>

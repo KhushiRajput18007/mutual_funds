@@ -7,7 +7,6 @@ const options =
     ? {
         // Dev-only: relax TLS to unblock local development behind proxies/AV.
         tlsAllowInvalidCertificates: true,
-        tlsInsecure: true,
         serverSelectionTimeoutMS: 5000,
       }
     : {};

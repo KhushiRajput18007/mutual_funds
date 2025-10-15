@@ -8,8 +8,13 @@ async function fetchJSON(url) {
 }
 
 export async function updateActiveFunds(logger = console) {
-  const client = await getClientPromise;
-  const db = client.db('mutual_funds');
+  let db = null;
+  try {
+    const client = await getClientPromise;
+    db = client.db('mutual_funds');
+  } catch (e) {
+    logger.warn('[ActiveFunds] DB unavailable, will compute without writing:', e?.message || e);
+  }
   const today = new Date();
   const target = new Date(today);
   target.setDate(target.getDate() - 1); // Use previous day
@@ -57,13 +62,21 @@ export async function updateActiveFunds(logger = console) {
 
   logger.log(`[ActiveFunds] Active for ${targetStr}: ${active.length}`);
 
-  // Upsert active list for today
-  const col = db.collection(COLLECTIONS.ACTIVE_SCHEMES);
-  await col.deleteMany({ date: targetStr });
-  if (active.length) {
-    await col.insertMany(active);
+  // Upsert active list for today if DB is available
+  if (db) {
+    try {
+      const col = db.collection(COLLECTIONS.ACTIVE_SCHEMES);
+      await col.deleteMany({ date: targetStr });
+      if (active.length) {
+        await col.insertMany(active);
+      }
+      logger.log(`[ActiveFunds] Update completed and written to DB.`);
+    } catch (e) {
+      logger.warn('[ActiveFunds] Failed to write to DB, returning computed list only:', e?.message || e);
+    }
+  } else {
+    logger.log(`[ActiveFunds] DB unavailable; returning computed list without persisting.`);
   }
-  logger.log(`[ActiveFunds] Update completed.`);
 
   return { date: targetStr, count: active.length };
 }

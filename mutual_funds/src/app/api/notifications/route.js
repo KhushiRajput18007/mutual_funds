@@ -6,10 +6,19 @@ const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/
 const CACHE_DURATION = 8 * 60 * 1000; // 8 minutes
 const MARKET_DATA_CACHE_DURATION = 8 * 60 * 1000; // 8 minutes
 
+// In-memory caches to avoid repeated live calls
+let NOTIF_CACHE = { data: null, at: 0 };
+let MARKET_CACHE = { data: null, at: 0 };
+
 export async function GET() {
   try {
+    // Serve cached notifications if fresh
+    if (NOTIF_CACHE.data && Date.now() - NOTIF_CACHE.at < CACHE_DURATION) {
+      return NextResponse.json(NOTIF_CACHE.data);
+    }
+
     console.log('Generating fresh notifications with live market data...');
-    
+
     const marketData = await getMarketData();
     const notifications = await generateNotifications(marketData);
     
@@ -19,7 +28,9 @@ export async function GET() {
       createdAt: new Date()
     }));
 
-    return NextResponse.json(notificationsWithTimestamp);
+    // Cache and return
+    NOTIF_CACHE = { data: notificationsWithTimestamp, at: Date.now() };
+    return NextResponse.json(NOTIF_CACHE.data);
   } catch (error) {
     console.error('Error generating notifications:', error);
     // Fallback to a small static set so UI doesn't break
@@ -32,13 +43,18 @@ export async function GET() {
 }
 
 async function getMarketData() {
+  // Serve cached market data if still fresh
+  if (MARKET_CACHE.data && Date.now() - MARKET_CACHE.at < MARKET_DATA_CACHE_DURATION) {
+    return MARKET_CACHE.data;
+  }
+
   console.log('Fetching live market data from MFAPI.in...');
 
   try {
     // Add timeout + small retry for resilience
     const listUrl = 'https://api.mfapi.in/mf';
-    const maxRetries = 1;
-    const timeoutMs = 10000; // 10s
+    const maxRetries = 3;
+    const timeoutMs = 15000; // 15s
     let allFunds = [];
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
@@ -48,13 +64,22 @@ async function getMarketData() {
         clearTimeout(timer);
         if (!fundsResponse.ok) {
           console.warn('MFAPI list non-OK:', fundsResponse.status);
-          if (attempt < maxRetries) continue; else return null;
+          if (attempt < maxRetries) {
+            await new Promise(r => setTimeout(r, 500 * Math.pow(2, attempt)));
+            continue;
+          } else {
+            return MARKET_CACHE.data || null;
+          }
         }
         allFunds = await fundsResponse.json();
         break;
       } catch (e) {
         console.warn('MFAPI list fetch error attempt', attempt + 1, e?.code || '', e?.message || '');
-        if (attempt === maxRetries) return null;
+        if (attempt < maxRetries) {
+          await new Promise(r => setTimeout(r, 500 * Math.pow(2, attempt)));
+        } else {
+          return MARKET_CACHE.data || null;
+        }
       }
     }
     
@@ -84,11 +109,11 @@ async function getMarketData() {
           }
         }
       } catch (error) {
-        console.error(`Error fetching performance for ${fund.schemeName}:`, error);
+        console.warn(`Error fetching performance for ${fund.schemeName}:`, error?.message || error);
       }
     }
     
-    return {
+    const market = {
       topPerformers: fundPerformance.filter(f => f.change > 0).sort((a, b) => b.change - a.change).slice(0, 5),
       underPerformers: fundPerformance.filter(f => f.change < 0).sort((a, b) => a.change - b.change).slice(0, 3),
       categories: [...new Set(fundPerformance.map(f => f.category))],
@@ -97,9 +122,11 @@ async function getMarketData() {
       volatileCategories: [...new Set(fundPerformance.filter(f => Math.abs(f.change) > 2).map(f => f.category))],
       stablePerformers: fundPerformance.filter(f => f.change > 0 && f.change < 1).slice(0, 3)
     };
+    MARKET_CACHE = { data: market, at: Date.now() };
+    return market;
   } catch (error) {
     console.error('Error fetching market data:', error);
-    return null;
+    return MARKET_CACHE.data || null;
   }
 }
 

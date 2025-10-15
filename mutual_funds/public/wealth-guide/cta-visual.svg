@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="280" viewBox="0 0 280 280" fill="none">
+  <defs>
+    <radialGradient id="ctaGradient" cx="0.3" cy="0.3">
+      <stop offset="0%" stop-color="rgba(99, 102, 241, 0.2)" />
+      <stop offset="50%" stop-color="rgba(139, 92, 246, 0.15)" />
+      <stop offset="100%" stop-color="rgba(236, 72, 153, 0.1)" />
+    </radialGradient>
+    <linearGradient id="portfolioGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="50%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+  </defs>
+  <circle cx="140" cy="140" r="120" fill="url(#ctaGradient)"/>
+  <rect x="90" y="80" width="100" height="120" rx="12" fill="#1f2937" stroke="url(#portfolioGradient)" stroke-width="2"/>
+  <text x="140" y="100" font-size="12" fill="url(#portfolioGradient)" text-anchor="middle" font-weight="700">Portfolio</text>
+  <text x="140" y="125" font-size="16" fill="#10b981" text-anchor="middle" font-weight="800">₹12,45,678</text>
+  <rect x="120" y="135" width="40" height="12" rx="6" fill="rgba(16, 185, 129, 0.2)"/>
+  <text x="140" y="143" font-size="8" fill="#10b981" text-anchor="middle" font-weight="600">+24.3%</text>
+  <rect x="95" y="170" width="2" height="8" rx="1" fill="#6366f1"/>
+  <rect x="99" y="167" width="2" height="12" rx="1" fill="#8b5cf6"/>
+  <rect x="103" y="160" width="2" height="15" rx="1" fill="#a855f7"/>
+  <rect x="107" y="165" width="2" height="10" rx="1" fill="#c084fc"/>
+  <rect x="111" y="157" width="2" height="18" rx="1" fill="#e879f9"/>
+  <rect x="115" y="161" width="2" height="14" rx="1" fill="#f472b6"/>
+  <circle cx="50" cy="60" r="8" fill="#f59e0b"/>
+  <circle cx="210" cy="90" r="8" fill="#10b981"/>
+  <circle cx="60" cy="200" r="8" fill="#ec4899"/>
+  <circle cx="200" cy="210" r="8" fill="#3b82f6"/>
+  <text x="50" y="45" font-size="8" fill="#f59e0b" text-anchor="middle" font-weight="700">Alert</text>
+  <text x="210" y="75" font-size="8" fill="#10b981" text-anchor="middle" font-weight="700">Update</text>
+  <text x="60" y="185" font-size="8" fill="#ec4899" text-anchor="middle" font-weight="700">News</text>
+  <text x="200" y="195" font-size="8" fill="#3b82f6" text-anchor="middle" font-weight="700">Signal</text>
+  <circle cx="140" cy="140" r="60" fill="none" stroke="rgba(99, 102, 241, 0.2)" stroke-width="2"/>
+</svg>

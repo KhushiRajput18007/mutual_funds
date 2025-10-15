@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" fill="none">
+  <circle cx="60" cy="60" r="50" fill="rgba(16, 185, 129, 0.1)" stroke="rgba(16, 185, 129, 0.3)" stroke-width="2"/>
+  <rect x="35" y="35" width="50" height="35" rx="4" fill="#1f2937" stroke="#10b981" stroke-width="2"/>
+  <line x1="38" y1="42" x2="70" y2="42" stroke="#10b981" stroke-width="1.5"/>
+  <line x1="38" y1="48" x2="65" y2="48" stroke="#10b981" stroke-width="1.5"/>
+  <line x1="38" y1="54" x2="60" y2="54" stroke="#10b981" stroke-width="1.5"/>
+  <line x1="38" y1="60" x2="55" y2="60" stroke="#10b981" stroke-width="1.5"/>
+  <circle cx="77" cy="40" r="3" fill="#ef4444"/>
+  <text x="77" y="50" font-size="6" fill="#ef4444" text-anchor="middle" font-weight="600">LIVE</text>
+  <circle cx="25" cy="25" r="8" fill="#f59e0b"/>
+  <circle cx="95" cy="25" r="8" fill="#ec4899"/>
+  <circle cx="25" cy="95" r="8" fill="#8b5cf6"/>
+  <text x="25" y="28" font-size="8" fill="white" text-anchor="middle" font-weight="700">3</text>
+  <text x="95" y="28" font-size="8" fill="white" text-anchor="middle" font-weight="700">7</text>
+  <text x="25" y="98" font-size="8" fill="white" text-anchor="middle" font-weight="700">2</text>
+</svg>

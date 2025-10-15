@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import axios from 'axios';
 
 function calculateSIP(navData, amount, frequency, fromDate, toDate) {
   const start = new Date(fromDate);
@@ -92,8 +93,8 @@ export async function POST(request, { params }) {
     }
     
     // Get scheme data
-    const schemeResponse = await fetch(`${request.nextUrl.origin}/api/scheme/${code}`);
-    const schemeData = await schemeResponse.json();
+    const schemeResponse = await axios.get(`${request.nextUrl.origin}/api/scheme/${code}`, { headers: { Accept: 'application/json' } });
+    const schemeData = schemeResponse.data;
     
     if (!schemeData.data) {
       return NextResponse.json({ error: 'Scheme not found' }, { status: 404 });

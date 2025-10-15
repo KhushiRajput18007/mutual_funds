@@ -7,8 +7,8 @@ export async function register() {
     if (!globalThis.__activeFundsCronStarted) {
       globalThis.__activeFundsCronStarted = true;
 
-      // Schedule daily at 7:00 AM Asia/Kolkata
-      cron.schedule('0 7 * * *', async () => {
+      // Schedule daily at 6:00 AM Asia/Kolkata
+      cron.schedule('0 6 * * *', async () => {
         try {
           await updateActiveFunds(console);
         } catch (e) {

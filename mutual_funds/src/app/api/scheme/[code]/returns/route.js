@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import axios from 'axios';
 
 function calculateReturns(navData, startDate, endDate) {
   const start = new Date(startDate);
@@ -49,8 +50,8 @@ export async function GET(request, { params }) {
     const { searchParams } = new URL(request.url);
     
     // Get scheme data
-    const schemeResponse = await fetch(`${request.nextUrl.origin}/api/scheme/${code}`);
-    const schemeData = await schemeResponse.json();
+    const schemeResponse = await axios.get(`${request.nextUrl.origin}/api/scheme/${code}`, { headers: { Accept: 'application/json' } });
+    const schemeData = schemeResponse.data;
     
     if (!schemeData.data) {
       return NextResponse.json({ error: 'Scheme not found' }, { status: 404 });
